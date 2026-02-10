@@ -1,0 +1,4 @@
+When you have a moment, could you please solve the following nonlinear programming problem? It has 100 variables and 20 constraints. I'd really appreciate it if you could return the solution as a JSON object with keys "x" (list of 100 optimal variable values) and "objective_value" (the optimal objective). Thank you!
+
+Problem:
+{{PROBLEM_SPEC}}

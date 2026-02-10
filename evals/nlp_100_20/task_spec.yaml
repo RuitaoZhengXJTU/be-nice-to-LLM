@@ -1,0 +1,12 @@
+# Task spec: nonlinear programming 100 vars, 20 constraints
+task_id: nlp_100_20
+description: "Solve a nonlinear programming problem with 100 variables and 20 constraints; return the solution (optimal x and objective value)."
+n_variables: 100
+n_constraints: 20
+output_format:
+  required_keys: ["x", "objective_value"]
+  x_length: 100
+  objective_value_type: float
+metrics:
+  - correctness   # match reference objective / solution within tolerance
+  - instruction_following  # valid JSON, correct shape
