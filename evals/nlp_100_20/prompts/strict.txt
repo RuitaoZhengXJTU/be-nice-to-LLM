@@ -1,0 +1,4 @@
+Solve the nonlinear programming problem below. 100 variables, 20 constraints. Return the solution as JSON with keys "x" (list of 100 floats) and "objective_value" (float). No explanation—output only the JSON.
+
+Problem:
+{{PROBLEM_SPEC}}
