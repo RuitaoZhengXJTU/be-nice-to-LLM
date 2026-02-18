@@ -1,0 +1,3 @@
+minimize sum(x[i] for i in 1..100)
+subject to: for j in 1..20: sum(x[i]^2 for i in 1..100) <= 1000 (same constraint repeated).
+Bounds: -5 <= x[i] <= 5 for all i.
