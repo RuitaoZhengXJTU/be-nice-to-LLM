@@ -1,0 +1,3 @@
+minimize sum(x[i]^2 for i in 1..100) + 0.01*sum(x[i] for i in 1..100)
+subject to: for j in 1..30: sum(x[i] for i in 1..100) + 0.1*sum(x[i]^2 for i in (j*3-2)..min(j*3,100)) >= -5.
+Bounds: -10 <= x[i] <= 10 for all i.

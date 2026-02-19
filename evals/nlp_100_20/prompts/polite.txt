@@ -1,0 +1,4 @@
+When you have a moment, could you please solve the following nonlinear programming problem? It has {{N_VARS}} variables and {{N_CONSTRAINTS}} constraints. I'd really appreciate it if you could return the solution as a JSON object with keys "x" (list of {{N_VARS}} optimal variable values) and "objective_value" (the optimal objective). Thank you!
+
+Problem:
+{{PROBLEM_SPEC}}

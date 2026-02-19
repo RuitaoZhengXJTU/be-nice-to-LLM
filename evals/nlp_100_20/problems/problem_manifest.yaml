@@ -1,0 +1,23 @@
+# Per-instance dimensions for output validation and prompt generation.
+# n_variables and n_constraints must match the problem description in each instance_XX.txt
+instance_01:
+  n_variables: 100
+  n_constraints: 20
+instance_02:
+  n_variables: 100
+  n_constraints: 20
+instance_03:
+  n_variables: 100
+  n_constraints: 20
+instance_04:
+  n_variables: 10
+  n_constraints: 3
+instance_05:
+  n_variables: 50
+  n_constraints: 15
+instance_06:
+  n_variables: 100
+  n_constraints: 30
+instance_07:
+  n_variables: 200
+  n_constraints: 25
