@@ -1,0 +1,8 @@
+{
+  "problem_id": "cnt_03",
+  "style": "strict",
+  "model": "gpt-4o-mini",
+  "finish_reason": "stop",
+  "raw_text": "{\"count\":1}",
+  "error": null
+}
