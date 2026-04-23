@@ -2,7 +2,7 @@
 
 Author: Jeremy
 Date: 2026-04-22
-Status: Draft -- awaiting scoring agreement before Ryan generates instances
+Status: Final -- design decisions locked, Ryan can generate instances
 
 ## What This Document Is
 
@@ -17,14 +17,13 @@ Three natural sub-types, each with a different correctness definition:
 
 - **Prompt asks**: "What is the primary object in this image? Return JSON: {\"label\": \"...\"}."
 - **Correct**: exact string match against ground-truth label (case-insensitive, strip whitespace).
-  For top-k tolerance: correct if ground-truth is in agent's top-k list.
 - **Metric analogous to optimality_gap**: `label_error = 1 - exact_match` (binary per instance).
   Across instances: mean label_error + 95% bootstrap CI.
 
 ### 2. Object Counting
 
 - **Prompt asks**: "How many [object] are in the image? Return JSON: {\"count\": <integer>}."
-- **Correct**: exact integer match, or within tolerance T (e.g., |pred - gt| <= 1 for small counts).
+- **Correct (primary)**: exact integer match.
 - **Metric**: `count_error = |pred_count - gt_count| / max(gt_count, 1)`.
   Directly analogous to optimality_gap in compare_results.py.
 
@@ -62,17 +61,30 @@ For image tasks the analogous output schema is:
 
 Only the key relevant to the sub-type needs to be present.
 
-Required additions to the grading infrastructure:
+Required additions to the grading infrastructure (see grade_image.py in this directory):
 
-- `check_image_format(data, task_type)` -- validates required key is present and correctly typed.
-- `image_accuracy(pred, gt, task_type, tol=1)` -- returns float in [0, 1] (1.0 = fully correct).
+- `check_image_format(output, spec)` -- validates required key is present and correctly typed.
+- `image_accuracy(output, ground_truth, subtype)` -- returns float in [0, 1] (1.0 = fully correct).
 
-These can live in a new `evals/image_rec/grade_image.py` that mirrors compare_results.py's interface.
-The bootstrap CI logic added to compare_results.py (this commit) is reusable as-is for image tasks.
+The bootstrap CI logic in compare_results.py is reusable as-is for image tasks.
 
-## Open Questions (not blocking v1)
+## Design Decisions (locked -- unblocks Ryan)
 
-- Top-k tolerance for single-label: use top-1 strict for v1, add top-5 as secondary metric later.
-- Counting tolerance: start with exact match, flag +/-1 as a variant in the output JSON.
-- Image delivery to the model: URL vs base64. COCO images are publicly accessible by URL; prefer URL.
-- Whether to include adversarial/ambiguous images: defer to later, keep v1 unambiguous.
+Three questions were flagged as open in the draft. Decisions below.
+
+**1. Top-k tolerance for single-label**
+Use top-1 strict match for v1. The primary metric is exact match on the `label` field.
+Top-5 tolerance can be added as a secondary column in the output JSON later if exact-match
+rates are too low to distinguish styles. For now, top-1 strict keeps grading unambiguous.
+
+**2. Counting tolerance**
+Use exact integer match as the primary correctness criterion (count_error = 0 iff exact).
+The output JSON will also include a secondary flag `count_within_one` (bool) for cases where
+|pred - gt| <= 1. Report both in compare_multi output; use exact match for the headline CI.
+Rationale: occlusion and truncation make +/-1 meaningful, but we need an unambiguous primary.
+
+**3. Image delivery to the model**
+Use public URL. COCO val2017 images are accessible at
+`http://images.cocodataset.org/val2017/<filename>`. No base64 encoding needed for GPT-4V
+and similar models that accept URL inputs. If a model does not support URL inputs, the
+harness (Ryan's lane) can download and encode on-the-fly; the grading layer does not change.
