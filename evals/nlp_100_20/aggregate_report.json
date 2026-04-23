@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "model": "gpt-4o-mini",
+    "source_branch": "pv-01-Ryan",
+    "source_commit": "69929ac",
+    "n_instances": 7,
+    "bootstrap_reps": 2000,
+    "alpha": 0.05,
+    "ci_method": "percentile"
+  },
+  "aggregate": {
+    "polite": {
+      "n_instances_total": 7,
+      "n_instances_valid_format": 1,
+      "instruction_following_rate_raw": 0.142857,
+      "instruction_following_rate_ci_all7": {
+        "mean": 0.14285714285714285,
+        "ci_low": 0.0,
+        "ci_high": 0.42857142857142855,
+        "n": 7
+      },
+      "optimality_gap_valid_only": {
+        "mean": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "n": 1
+      },
+      "note_gap_ci": "CI computed over valid-format instances only; n is very small, interpret with caution"
+    },
+    "strict": {
+      "n_instances_total": 7,
+      "n_instances_valid_format": 2,
+      "instruction_following_rate_raw": 0.285714,
+      "instruction_following_rate_ci_all7": {
+        "mean": 0.2857142857142857,
+        "ci_low": 0.0,
+        "ci_high": 0.5714285714285714,
+        "n": 7
+      },
+      "optimality_gap_valid_only": {
+        "mean": 19.5,
+        "ci_low": 0.0,
+        "ci_high": 39.0,
+        "n": 2
+      },
+      "note_gap_ci": "CI computed over valid-format instances only; n is very small, interpret with caution"
+    }
+  },
+  "per_instance": [
+    {
+      "instance_id": "01",
+      "n_vars": 100,
+      "baseline_objective": 0.0,
+      "polite": {
+        "valid": false,
+        "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+        "instruction_following": 0
+      },
+      "strict": {
+        "valid": false,
+        "error": "x length 108 != expected 100",
+        "instruction_following": 0,
+        "objective_value_reported": 0.0
+      }
+    },
+    {
+      "instance_id": "02",
+      "n_vars": 100,
+      "baseline_objective": -316.2277660168,
+      "polite": {
+        "valid": false,
+        "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+        "instruction_following": 0
+      },
+      "strict": {
+        "valid": false,
+        "error": "x length 98 != expected 100",
+        "instruction_following": 0,
+        "objective_value_reported": 0
+      }
+    },
+    {
+      "instance_id": "03",
+      "n_vars": 100,
+      "baseline_objective": 0.0,
+      "polite": {
+        "valid": true,
+        "objective_value": 0,
+        "optimality_gap": 0.0,
+        "instruction_following": 1
+      },
+      "strict": {
+        "valid": true,
+        "objective_value": 0,
+        "optimality_gap": 0.0,
+        "instruction_following": 1
+      }
+    },
+    {
+      "instance_id": "04",
+      "n_vars": 10,
+      "baseline_objective": 0.1,
+      "polite": {
+        "valid": false,
+        "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+        "instruction_following": 0
+      },
+      "strict": {
+        "valid": true,
+        "objective_value": 4.0,
+        "optimality_gap": 39.0,
+        "instruction_following": 1
+      }
+    },
+    {
+      "instance_id": "05",
+      "n_vars": 50,
+      "baseline_objective": 4.1333333333,
+      "polite": {
+        "valid": false,
+        "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+        "instruction_following": 0
+      },
+      "strict": {
+        "valid": false,
+        "error": "x length 48 != expected 50",
+        "instruction_following": 0,
+        "objective_value_reported": 38.75
+      }
+    },
+    {
+      "instance_id": "06",
+      "n_vars": 100,
+      "baseline_objective": 31.5166666667,
+      "polite": {
+        "valid": false,
+        "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+        "instruction_following": 0
+      },
+      "strict": {
+        "valid": false,
+        "error": "x length 123 != expected 100",
+        "instruction_following": 0,
+        "objective_value_reported": 133.33333333333334
+      }
+    },
+    {
+      "instance_id": "07",
+      "n_vars": 200,
+      "baseline_objective": 27.625,
+      "polite": {
+        "valid": false,
+        "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+        "instruction_following": 0
+      },
+      "strict": {
+        "valid": false,
+        "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+        "instruction_following": 0
+      }
+    }
+  ],
+  "data_issues": [
+    "instance_01_polite: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+    "instance_01_strict: format check failed -- x length 108 != expected 100",
+    "instance_02_polite: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+    "instance_02_strict: format check failed -- x length 98 != expected 100",
+    "instance_04_polite: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+    "instance_05_polite: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+    "instance_05_strict: format check failed -- x length 48 != expected 50",
+    "instance_06_polite: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+    "instance_06_strict: format check failed -- x length 123 != expected 100",
+    "instance_07_polite: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+    "instance_07_strict: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+  ]
+}
