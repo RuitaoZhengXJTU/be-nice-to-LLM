@@ -30,7 +30,8 @@ Three natural sub-types, each with a different correctness definition:
 ### 3. Spatial / Relational
 
 - **Prompt asks**: "Describe the spatial relationship between A and B. Return JSON: {\"relation\": \"...\"}."
-- **Correct**: exact match against a closed vocabulary (e.g., "left of", "above", "behind").
+- **Correct**: exact match against a closed vocabulary: "above", "below", "left of", "right of", "inside", "contains".
+  Canonical vocabulary lives in `ALLOWED_RELATIONS` in `grade_image.py`; all future edits go there.
   Open-vocab descriptions are hard to grade automatically; restrict to closed-vocab for v1.
 - **Metric**: binary correct/incorrect per instance; mean + CI across instances.
 

@@ -18,10 +18,8 @@ import json
 from dataclasses import dataclass
 from typing import Union
 
-# Closed vocabulary for spatial relations (v1).
-# Values match the token strings used in the spt_*.yaml problem files.
-# The SCORING_DESIGN.md example showed underscores ("left_of") but the actual
-# YAML instances use spaces; this constant follows the YAML data.
+# Canonical vocabulary for spt sub-type. SCORING_DESIGN.md references this as the source of truth.
+# Values match the token strings used in the spt_*.yaml problem files (space-separated, not underscores).
 ALLOWED_RELATIONS: frozenset = frozenset([
     "above",
     "below",
