@@ -1,0 +1,42 @@
+# image recognition task spec -- DRAFT/PROPOSAL
+# candidate task types listed below; final set pending Jeremy's grading design note
+task: image_recognition
+version: "0.1-draft"
+status: proposal
+
+candidate_task_types:
+  - id: single_label_classification
+    description: >
+      Given an image, identify the single most prominent object or scene category.
+    input: image (URL or base64)
+    output_format: '{"label": "<class_name>", "confidence": <0-1 float>}'
+    notes: >-
+      Standard top-1 classification. Easy to autograde with exact-match or top-k.
+      Confidence field optional if Jeremy wants a simpler binary-correct metric.
+
+  - id: object_counting
+    description: >
+      Given an image and a target object class, count the number of instances visible.
+    input: image + target_class string
+    output_format: '{"count": <int>}'
+    notes: >-
+      Integer output makes grading straightforward. Ambiguous occlusion cases
+      will need a tolerance rule -- flagging for Jeremy's grading design.
+
+  - id: spatial_relation
+    description: >
+      Given an image and two named objects A and B, state the spatial relationship
+      of A relative to B.
+    input: image + object_a string + object_b string
+    output_format: '{"relation": "<above|below|left_of|right_of|inside|overlapping|none>"}'
+    notes: >-
+      Discrete label set keeps grading deterministic. Open question: allow ties
+      or require single best label. Flagging for Jeremy.
+
+output_schema_notes:
+  required_keys: vary by task type; see output_format per type above
+  disallowed: free-form prose; response must be valid JSON
+
+prompt_register:
+  polite: evals/imagerec/prompts/polite.txt
+  strict: evals/imagerec/prompts/strict.txt

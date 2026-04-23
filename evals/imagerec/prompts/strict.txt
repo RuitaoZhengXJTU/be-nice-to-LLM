@@ -1,0 +1,7 @@
+Analyze the provided image and answer the question.
+Respond ONLY with a JSON object matching the output format. No explanation, no prose.
+
+Task type: {{TASK_TYPE}}
+Question: {{QUESTION}}
+Output format: {{OUTPUT_FORMAT}}
+Image: {{IMAGE_INPUT}}

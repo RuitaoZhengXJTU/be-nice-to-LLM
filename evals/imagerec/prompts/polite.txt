@@ -1,0 +1,8 @@
+Hi! I would really appreciate your help with the following image recognition task.
+Please look at the provided image carefully and answer the question below.
+Kindly respond with a JSON object only, following the output format specified -- no extra text needed. Thank you!
+
+Task type: {{TASK_TYPE}}
+Question: {{QUESTION}}
+Output format: {{OUTPUT_FORMAT}}
+Image: {{IMAGE_INPUT}}
