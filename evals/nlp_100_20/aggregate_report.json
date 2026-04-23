@@ -2,22 +2,26 @@
   "meta": {
     "model": "gpt-4o-mini",
     "source_branch": "pv-01-Ryan",
-    "source_commit": "69929ac",
-    "n_instances": 7,
+    "source_commit": "0da7d64",
+    "n_instances": 6,
+    "n_instances_excluded": 1,
+    "excluded_instances": {
+      "07": "gpt-4o-mini hard cap is max_tokens=16384; strict output truncates mid-vector at that cap, polite returns prose instead of JSON. Re-run at max_tokens=16384 still truncates (pv-01-Ryan@0da7d64). Going-forward rule: any instance where either style truncates is excluded from aggregate scoring."
+    },
     "bootstrap_reps": 2000,
     "alpha": 0.05,
     "ci_method": "percentile"
   },
   "aggregate": {
     "polite": {
-      "n_instances_total": 7,
+      "n_instances_total": 6,
       "n_instances_valid_format": 1,
-      "instruction_following_rate_raw": 0.142857,
-      "instruction_following_rate_ci_all7": {
-        "mean": 0.14285714285714285,
+      "instruction_following_rate_raw": 0.166667,
+      "instruction_following_rate_ci_all6": {
+        "mean": 0.16666666666666666,
         "ci_low": 0.0,
-        "ci_high": 0.42857142857142855,
-        "n": 7
+        "ci_high": 0.5,
+        "n": 6
       },
       "optimality_gap_valid_only": {
         "mean": 0.0,
@@ -28,14 +32,14 @@
       "note_gap_ci": "CI computed over valid-format instances only; n is very small, interpret with caution"
     },
     "strict": {
-      "n_instances_total": 7,
+      "n_instances_total": 6,
       "n_instances_valid_format": 2,
-      "instruction_following_rate_raw": 0.285714,
-      "instruction_following_rate_ci_all7": {
-        "mean": 0.2857142857142857,
+      "instruction_following_rate_raw": 0.333333,
+      "instruction_following_rate_ci_all6": {
+        "mean": 0.3333333333333333,
         "ci_low": 0.0,
-        "ci_high": 0.5714285714285714,
-        "n": 7
+        "ci_high": 0.6666666666666666,
+        "n": 6
       },
       "optimality_gap_valid_only": {
         "mean": 19.5,
@@ -143,21 +147,6 @@
         "instruction_following": 0,
         "objective_value_reported": 133.33333333333334
       }
-    },
-    {
-      "instance_id": "07",
-      "n_vars": 200,
-      "baseline_objective": 27.625,
-      "polite": {
-        "valid": false,
-        "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
-        "instruction_following": 0
-      },
-      "strict": {
-        "valid": false,
-        "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
-        "instruction_following": 0
-      }
     }
   ],
   "data_issues": [
@@ -169,8 +158,6 @@
     "instance_05_polite: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
     "instance_05_strict: format check failed -- x length 48 != expected 50",
     "instance_06_polite: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
-    "instance_06_strict: format check failed -- x length 123 != expected 100",
-    "instance_07_polite: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
-    "instance_07_strict: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+    "instance_06_strict: format check failed -- x length 123 != expected 100"
   ]
 }
