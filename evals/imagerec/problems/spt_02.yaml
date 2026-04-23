@@ -1,0 +1,10 @@
+id: spt_02
+sub_type: spatial_relation
+coco_image_id: 1425
+image_url: "http://images.cocodataset.org/val2017/000000001425.jpg"
+task_type: spatial_relation
+question: "Is the sandwich to the left or to the right of the bowl?"
+output_format: '{"relation": "left of" | "right of"}'
+ground_truth:
+  relation: "left of"
+notes: "COCO val2017 image 1425 (640x512). Sandwich center x=253, bowl center x=563 (x increases rightward). Sandwich is to the left of the bowl."

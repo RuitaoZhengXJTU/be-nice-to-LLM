@@ -1,0 +1,58 @@
+# Image recognition instance manifest
+# Ground truth verified from COCO val2017 instances_val2017.json annotations.
+# All image URLs confirmed HTTP 200 before commit.
+
+instances:
+  - id: clf_01
+    sub_type: single_label_classification
+    coco_image_id: 285
+    gt_key: label
+    gt_value: "bear"
+
+  - id: clf_02
+    sub_type: single_label_classification
+    coco_image_id: 1353
+    gt_key: label
+    gt_value: "train"
+
+  - id: clf_03
+    sub_type: single_label_classification
+    coco_image_id: 1584
+    gt_key: label
+    gt_value: "bus"
+
+  - id: cnt_01
+    sub_type: counting
+    coco_image_id: 285
+    gt_key: count
+    gt_value: 1
+
+  - id: cnt_02
+    sub_type: counting
+    coco_image_id: 1584
+    gt_key: count
+    gt_value: 3
+
+  - id: cnt_03
+    sub_type: counting
+    coco_image_id: 724
+    gt_key: count
+    gt_value: 2
+
+  - id: spt_01
+    sub_type: spatial_relation
+    coco_image_id: 724
+    gt_key: relation
+    gt_value: "above"
+
+  - id: spt_02
+    sub_type: spatial_relation
+    coco_image_id: 1425
+    gt_key: relation
+    gt_value: "left of"
+
+  - id: spt_03
+    sub_type: spatial_relation
+    coco_image_id: 1353
+    gt_key: relation
+    gt_value: "above"

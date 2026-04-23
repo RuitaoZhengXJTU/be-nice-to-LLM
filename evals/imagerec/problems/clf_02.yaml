@@ -1,0 +1,10 @@
+id: clf_02
+sub_type: single_label_classification
+coco_image_id: 1353
+image_url: "http://images.cocodataset.org/val2017/000000001353.jpg"
+task_type: single_label_classification
+question: "What type of vehicle is most prominent in this image?"
+output_format: '{"label": "<vehicle_type>"}'
+ground_truth:
+  label: "train"
+notes: "COCO val2017 image 1353 (375x500). Annotations: 1 train, 6 persons. Train is the primary vehicle."

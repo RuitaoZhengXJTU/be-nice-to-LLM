@@ -1,0 +1,10 @@
+id: clf_03
+sub_type: single_label_classification
+coco_image_id: 1584
+image_url: "http://images.cocodataset.org/val2017/000000001584.jpg"
+task_type: single_label_classification
+question: "What type of large vehicle is most prominent in this image?"
+output_format: '{"label": "<vehicle_type>"}'
+ground_truth:
+  label: "bus"
+notes: "COCO val2017 image 1584 (612x612). Annotations: 3 buses (one large, two small), 11 persons."

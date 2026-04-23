@@ -1,0 +1,10 @@
+id: spt_01
+sub_type: spatial_relation
+coco_image_id: 724
+image_url: "http://images.cocodataset.org/val2017/000000000724.jpg"
+task_type: spatial_relation
+question: "Is the large stop sign in the foreground above or below the truck in the background?"
+output_format: '{"relation": "above" | "below"}'
+ground_truth:
+  relation: "above"
+notes: "COCO val2017 image 724 (375x500). Stop sign center y=148, truck center y=295 (y increases downward). Stop sign is above truck in image plane."

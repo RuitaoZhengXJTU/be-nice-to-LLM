@@ -1,0 +1,10 @@
+id: spt_03
+sub_type: spatial_relation
+coco_image_id: 1353
+image_url: "http://images.cocodataset.org/val2017/000000001353.jpg"
+task_type: spatial_relation
+question: "Are the people above or below the train in the image?"
+output_format: '{"relation": "above" | "below"}'
+ground_truth:
+  relation: "above"
+notes: "COCO val2017 image 1353 (375x500). Person centers y=163-290, train center y=393 (y increases downward). People appear above the train in image plane."

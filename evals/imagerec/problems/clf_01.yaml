@@ -1,0 +1,10 @@
+id: clf_01
+sub_type: single_label_classification
+coco_image_id: 285
+image_url: "http://images.cocodataset.org/val2017/000000000285.jpg"
+task_type: single_label_classification
+question: "What animal is shown in this image?"
+output_format: '{"label": "<animal_name>"}'
+ground_truth:
+  label: "bear"
+notes: "COCO val2017 image 285 (586x640). Annotation: 1 bear."

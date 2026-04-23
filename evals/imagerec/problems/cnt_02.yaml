@@ -1,0 +1,10 @@
+id: cnt_02
+sub_type: counting
+coco_image_id: 1584
+image_url: "http://images.cocodataset.org/val2017/000000001584.jpg"
+task_type: counting
+question: "How many buses are visible in this image?"
+output_format: '{"count": <integer>}'
+ground_truth:
+  count: 3
+notes: "COCO val2017 image 1584 (612x612). Annotations: 3 bus instances (1 large foreground, 2 smaller background)."
