@@ -1,0 +1,6 @@
+minimize sum(x[i]^2 for i in 1..10)
+subject to:
+  sum(x[i] for i in 1..10) >= 1;
+  sum(x[i]^2 for i in 1..5) <= 4;
+  sum(x[i] for i in 6..10) >= -1.
+Bounds: -10 <= x[i] <= 10 for all i.

@@ -1,0 +1,30 @@
+# problem manifest -- lists expected dimensions for all instances
+instances:
+  - id: instance_01
+    n_vars: 100
+    n_constraints: 20
+    notes: original instance
+  - id: instance_02
+    n_vars: 100
+    n_constraints: 20
+    notes: second run, same spec
+  - id: instance_03
+    n_vars: 100
+    n_constraints: 20
+    notes: third run, same spec
+  - id: instance_04
+    n_vars: 10
+    n_constraints: 3
+    notes: small instance
+  - id: instance_05
+    n_vars: 50
+    n_constraints: 15
+    notes: medium instance
+  - id: instance_06
+    n_vars: 100
+    n_constraints: 30
+    notes: large instance, more constraints than instance_01-03
+  - id: instance_07
+    n_vars: 200
+    n_constraints: 25
+    notes: extra-large instance

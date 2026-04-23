@@ -1,0 +1,4 @@
+Solve the following nonlinear programming problem. N_VARS variables, N_CONSTRAINTS constraints. Return ONLY a JSON object with keys "x" (list of N_VARS values) and "objective_value" (scalar). No explanation.
+
+Problem:
+{{PROBLEM_SPEC}}
