@@ -28,3 +28,15 @@ instances:
     n_vars: 200
     n_constraints: 25
     notes: extra-large instance
+  - id: instance_08
+    n_vars: 50
+    n_constraints: 10
+    notes: sub-200-var instance, groups-of-5 constraints, threshold j*0.5
+  - id: instance_09
+    n_vars: 100
+    n_constraints: 20
+    notes: sub-200-var instance, groups-of-5 constraints, threshold j*0.5
+  - id: instance_10
+    n_vars: 150
+    n_constraints: 30
+    notes: sub-200-var instance, groups-of-5 constraints, threshold j*0.5
