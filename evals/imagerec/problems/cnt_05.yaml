@@ -1,0 +1,10 @@
+id: cnt_05
+sub_type: counting
+coco_image_id: 149622
+image_url: "http://images.cocodataset.org/val2017/000000149622.jpg"
+task_type: counting
+question: "How many birds are visible in this image?"
+output_format: '{"count": <integer>}'
+ground_truth:
+  count: 2
+notes: "COCO val2017 image 149622 (640x453). Annotations: 2 bird instances (center1: 223,242; center2: 434,184)."

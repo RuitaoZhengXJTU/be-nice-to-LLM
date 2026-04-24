@@ -56,3 +56,39 @@ instances:
     coco_image_id: 1353
     gt_key: relation
     gt_value: "above"
+
+  - id: clf_04
+    sub_type: single_label_classification
+    coco_image_id: 575205
+    gt_key: label
+    gt_value: "airplane"
+
+  - id: clf_05
+    sub_type: single_label_classification
+    coco_image_id: 576052
+    gt_key: label
+    gt_value: "horse"
+
+  - id: cnt_04
+    sub_type: counting
+    coco_image_id: 5477
+    gt_key: count
+    gt_value: 2
+
+  - id: cnt_05
+    sub_type: counting
+    coco_image_id: 149622
+    gt_key: count
+    gt_value: 2
+
+  - id: spt_04
+    sub_type: spatial_relation
+    coco_image_id: 6894
+    gt_key: relation
+    gt_value: "right of"
+
+  - id: spt_05
+    sub_type: spatial_relation
+    coco_image_id: 236166
+    gt_key: relation
+    gt_value: "below"

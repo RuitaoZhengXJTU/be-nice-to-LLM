@@ -1,0 +1,10 @@
+id: clf_04
+sub_type: single_label_classification
+coco_image_id: 575205
+image_url: "http://images.cocodataset.org/val2017/000000575205.jpg"
+task_type: single_label_classification
+question: "What type of vehicle is shown in this image?"
+output_format: '{"label": "<vehicle_type>"}'
+ground_truth:
+  label: "airplane"
+notes: "COCO val2017 image 575205 (640x427). Annotation: 1 airplane (bbox 126,206,343x115, center 298,263)."

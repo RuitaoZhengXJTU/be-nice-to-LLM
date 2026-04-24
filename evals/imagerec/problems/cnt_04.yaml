@@ -1,0 +1,10 @@
+id: cnt_04
+sub_type: counting
+coco_image_id: 5477
+image_url: "http://images.cocodataset.org/val2017/000000005477.jpg"
+task_type: counting
+question: "How many airplanes are visible in this image?"
+output_format: '{"count": <integer>}'
+ground_truth:
+  count: 2
+notes: "COCO val2017 image 5477 (640x349). Annotations: 2 airplane instances (1 large foreground center~320,197; 1 smaller background center~177,263)."

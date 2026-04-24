@@ -1,0 +1,10 @@
+id: spt_05
+sub_type: spatial_relation
+coco_image_id: 236166
+image_url: "http://images.cocodataset.org/val2017/000000236166.jpg"
+task_type: spatial_relation
+question: "Is the dog above or below the person?"
+output_format: '{"relation": "above" | "below"}'
+ground_truth:
+  relation: "below"
+notes: "COCO val2017 image 236166 (426x640). Dog center y=463, person center y=316 (y increases downward). Dog is below the person in image plane."

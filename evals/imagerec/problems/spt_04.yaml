@@ -1,0 +1,10 @@
+id: spt_04
+sub_type: spatial_relation
+coco_image_id: 6894
+image_url: "http://images.cocodataset.org/val2017/000000006894.jpg"
+task_type: spatial_relation
+question: "Is the person to the left or to the right of the elephant?"
+output_format: '{"relation": "left of" | "right of"}'
+ground_truth:
+  relation: "right of"
+notes: "COCO val2017 image 6894 (640x480). Person center x=467, elephant center x=319 (x increases rightward). Person is to the right of the elephant."

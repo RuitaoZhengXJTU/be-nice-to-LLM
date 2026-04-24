@@ -1,0 +1,10 @@
+id: clf_05
+sub_type: single_label_classification
+coco_image_id: 576052
+image_url: "http://images.cocodataset.org/val2017/000000576052.jpg"
+task_type: single_label_classification
+question: "What large animal is shown in this image?"
+output_format: '{"label": "<animal_name>"}'
+ground_truth:
+  label: "horse"
+notes: "COCO val2017 image 576052 (640x427). Annotation: 1 horse (center 450,264), 1 person riding."
