@@ -2,11 +2,12 @@
   "meta": {
     "model": "gpt-4o-mini",
     "source_branch": "pv-01-Ryan",
-    "source_commit": "0da7d64",
-    "n_instances": 6,
-    "n_instances_excluded": 1,
+    "source_commit": "b564a85",
+    "n_instances": 8,
+    "n_instances_excluded": 2,
     "excluded_instances": {
-      "07": "gpt-4o-mini hard cap is max_tokens=16384; strict output truncates mid-vector at that cap, polite returns prose instead of JSON. Re-run at max_tokens=16384 still truncates (pv-01-Ryan@0da7d64). Going-forward rule: any instance where either style truncates is excluded from aggregate scoring."
+      "07": "200-var problem. gpt-4o-mini hard cap is max_tokens=16384; strict output truncates mid-vector at that cap, polite returns prose. Re-run at max_tokens=16384 still truncates (pv-01-Ryan@0da7d64). Going-forward rule: any instance where either style truncates is excluded from aggregate scoring.",
+      "10": "150-var problem. gpt-4o-mini hard cap is max_tokens=16384; strict output truncates at that cap (finish_reason=length), polite returns prose. Documented in pv-01-Ryan@b564a85. Same going-forward exclusion rule as instance_07."
     },
     "bootstrap_reps": 2000,
     "alpha": 0.05,
@@ -14,14 +15,14 @@
   },
   "aggregate": {
     "polite": {
-      "n_instances_total": 6,
+      "n_instances_total": 8,
       "n_instances_valid_format": 1,
-      "instruction_following_rate_raw": 0.166667,
-      "instruction_following_rate_ci_all6": {
-        "mean": 0.16666666666666666,
+      "instruction_following_rate_raw": 0.125,
+      "instruction_following_rate_ci_all8": {
+        "mean": 0.125,
         "ci_low": 0.0,
-        "ci_high": 0.5,
-        "n": 6
+        "ci_high": 0.375,
+        "n": 8
       },
       "optimality_gap_valid_only": {
         "mean": 0.0,
@@ -32,14 +33,14 @@
       "note_gap_ci": "CI computed over valid-format instances only; n is very small, interpret with caution"
     },
     "strict": {
-      "n_instances_total": 6,
+      "n_instances_total": 8,
       "n_instances_valid_format": 2,
-      "instruction_following_rate_raw": 0.333333,
-      "instruction_following_rate_ci_all6": {
-        "mean": 0.3333333333333333,
+      "instruction_following_rate_raw": 0.25,
+      "instruction_following_rate_ci_all8": {
+        "mean": 0.25,
         "ci_low": 0.0,
-        "ci_high": 0.6666666666666666,
-        "n": 6
+        "ci_high": 0.625,
+        "n": 8
       },
       "optimality_gap_valid_only": {
         "mean": 19.5,
@@ -147,6 +148,40 @@
         "instruction_following": 0,
         "objective_value_reported": 133.33333333333334
       }
+    },
+    {
+      "instance_id": "08",
+      "n_vars": 50,
+      "baseline_objective": 19.25,
+      "polite": {
+        "valid": false,
+        "error": "missing x or objective_value key",
+        "instruction_following": 0,
+        "objective_value_reported": null
+      },
+      "strict": {
+        "valid": false,
+        "error": "x length 47 != expected 50",
+        "instruction_following": 0,
+        "objective_value_reported": 0.0
+      }
+    },
+    {
+      "instance_id": "09",
+      "n_vars": 100,
+      "baseline_objective": 143.5,
+      "polite": {
+        "valid": false,
+        "error": "missing x or objective_value key",
+        "instruction_following": 0,
+        "objective_value_reported": null
+      },
+      "strict": {
+        "valid": false,
+        "error": "x length 104 != expected 100",
+        "instruction_following": 0,
+        "objective_value_reported": 0.0
+      }
     }
   ],
   "data_issues": [
@@ -158,6 +193,10 @@
     "instance_05_polite: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
     "instance_05_strict: format check failed -- x length 48 != expected 50",
     "instance_06_polite: load failed -- JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
-    "instance_06_strict: format check failed -- x length 123 != expected 100"
+    "instance_06_strict: format check failed -- x length 123 != expected 100",
+    "instance_08_polite: format check failed -- missing x or objective_value key",
+    "instance_08_strict: format check failed -- x length 47 != expected 50",
+    "instance_09_polite: format check failed -- missing x or objective_value key",
+    "instance_09_strict: format check failed -- x length 104 != expected 100"
   ]
 }

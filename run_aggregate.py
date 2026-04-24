@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-Aggregate scorer for nlp_100_20: 6 instances (01-06) x polite/strict.
-instance_07 is pre-excluded: gpt-4o-mini hard cap is 16384 tokens;
-strict output truncates mid-vector at that cap, polite returns prose.
-Documented in pv-01-Ryan@0da7d64. Going-forward rule: any instance
-where either style truncates is excluded from aggregate scoring.
-Reads outputs from origin/pv-01-Ryan (commit 0da7d64).
+Aggregate scorer for nlp_100_20: 8 instances (01-06, 08, 09) x polite/strict.
+instance_07 pre-excluded: 200-var strict truncates at gpt-4o-mini 16384-token cap.
+instance_10 pre-excluded: 150-var strict truncates at gpt-4o-mini 16384-token cap.
+Going-forward rule: any instance where either style truncates is excluded.
+Reads outputs from origin/pv-01-Ryan (commit b564a85).
 Baselines computed analytically (proofs in docstrings below).
 Outputs: evals/nlp_100_20/aggregate_report.json
          evals/nlp_100_20/AGGREGATE_SUMMARY.md
@@ -17,16 +16,21 @@ import subprocess
 from pathlib import Path
 
 RYAN_BRANCH = "origin/pv-01-Ryan"
-RYAN_COMMIT = "0da7d64"
+RYAN_COMMIT = "b564a85"
 MODEL = "gpt-4o-mini"
 
 EXCLUDED_INSTANCES = {
     "07": (
-        "gpt-4o-mini hard cap is max_tokens=16384; strict output truncates mid-vector "
-        "at that cap, polite returns prose instead of JSON. Re-run at max_tokens=16384 "
+        "200-var problem. gpt-4o-mini hard cap is max_tokens=16384; strict output "
+        "truncates mid-vector at that cap, polite returns prose. Re-run at max_tokens=16384 "
         "still truncates (pv-01-Ryan@0da7d64). Going-forward rule: any instance where "
         "either style truncates is excluded from aggregate scoring."
-    )
+    ),
+    "10": (
+        "150-var problem. gpt-4o-mini hard cap is max_tokens=16384; strict output "
+        "truncates at that cap (finish_reason=length), polite returns prose. "
+        "Documented in pv-01-Ryan@b564a85. Same going-forward exclusion rule as instance_07."
+    ),
 }
 
 
@@ -48,6 +52,10 @@ def compute_baselines():
          Within each group of 3: uniform x=j*0.1/3. x[90..99]=0. obj=sum_j (j*0.1)^2/3.
     i07: min sum(x^2,i=1..200), j=1..25: sum(x,group_j)>=j*0.2 (groups of 8), [-5,5]
          Within each group of 8: uniform x=j*0.2/8. obj=sum_j 8*(j*0.025)^2.
+    i08: min sum(x^2,i=1..50), j=1..10: sum(x,group_j)>=j*0.5 (groups of 5, 5j-4..5j), [-10,10]
+         Within each group of 5: uniform x=j*0.5/5=j*0.1. obj=sum_j=1..10 5*(j*0.1)^2=0.05*385=19.25.
+    i09: min sum(x^2,i=1..100), j=1..20: sum(x,group_j)>=j*0.5 (groups of 5, 5j-4..5j), [-10,10]
+         Within each group of 5: uniform x=j*0.1. obj=sum_j=1..20 5*(j*0.1)^2=0.05*2870=143.5.
     """
     sqrt10 = math.sqrt(10)
     b = {}
@@ -88,6 +96,24 @@ def compute_baselines():
             x7[8*(j-1)+k] = v
         obj7 += 8.0 * v**2
     b["07"] = {"n": 200, "x": [round(v, 10) for v in x7], "objective_value": round(obj7, 10)}
+
+    x8 = [0.0]*50
+    obj8 = 0.0
+    for j in range(1, 11):
+        v = j * 0.5 / 5.0
+        for k in range(5):
+            x8[5*(j-1)+k] = v
+        obj8 += 5.0 * v**2
+    b["08"] = {"n": 50, "x": [round(v, 10) for v in x8], "objective_value": round(obj8, 10)}
+
+    x9 = [0.0]*100
+    obj9 = 0.0
+    for j in range(1, 21):
+        v = j * 0.5 / 5.0
+        for k in range(5):
+            x9[5*(j-1)+k] = v
+        obj9 += 5.0 * v**2
+    b["09"] = {"n": 100, "x": [round(v, 10) for v in x9], "objective_value": round(obj9, 10)}
 
     return b
 
@@ -146,12 +172,12 @@ def run():
     per_instance = []
     data_issues = []
 
-    polite_if = []   # 1 or 0, over all 6 instances (01-06)
+    polite_if = []   # 1 or 0, over all 8 instances (01-06, 08, 09)
     strict_if = []
     polite_gaps = []  # only for valid-format instances
     strict_gaps = []
 
-    for iid in ["01", "02", "03", "04", "05", "06"]:
+    for iid in ["01", "02", "03", "04", "05", "06", "08", "09"]:
         b = baselines[iid]
         n, obj_ref = b["n"], b["objective_value"]
         rec = {"instance_id": iid, "n_vars": n, "baseline_objective": obj_ref,
@@ -192,18 +218,18 @@ def run():
 
     agg = {
         "polite": {
-            "n_instances_total": 6,
+            "n_instances_total": 8,
             "n_instances_valid_format": sum(polite_if),
-            "instruction_following_rate_raw": round(sum(polite_if)/6, 6),
-            "instruction_following_rate_ci_all6": bootstrap_ci(polite_if),
+            "instruction_following_rate_raw": round(sum(polite_if)/8, 6),
+            "instruction_following_rate_ci_all8": bootstrap_ci(polite_if),
             "optimality_gap_valid_only": bootstrap_ci(polite_gaps),
             "note_gap_ci": "CI computed over valid-format instances only; n is very small, interpret with caution",
         },
         "strict": {
-            "n_instances_total": 6,
+            "n_instances_total": 8,
             "n_instances_valid_format": sum(strict_if),
-            "instruction_following_rate_raw": round(sum(strict_if)/6, 6),
-            "instruction_following_rate_ci_all6": bootstrap_ci(strict_if),
+            "instruction_following_rate_raw": round(sum(strict_if)/8, 6),
+            "instruction_following_rate_ci_all8": bootstrap_ci(strict_if),
             "optimality_gap_valid_only": bootstrap_ci(strict_gaps),
             "note_gap_ci": "CI computed over valid-format instances only; n is very small, interpret with caution",
         },
@@ -211,8 +237,8 @@ def run():
 
     return {
         "meta": {"model": MODEL, "source_branch": "pv-01-Ryan",
-                 "source_commit": RYAN_COMMIT, "n_instances": 6,
-                 "n_instances_excluded": 1,
+                 "source_commit": RYAN_COMMIT, "n_instances": 8,
+                 "n_instances_excluded": 2,
                  "excluded_instances": EXCLUDED_INSTANCES,
                  "bootstrap_reps": 2000, "alpha": 0.05,
                  "ci_method": "percentile"},
@@ -243,15 +269,15 @@ def generate_summary(report):
     lines.append("")
     lines.append("## Headline Numbers")
     lines.append("")
-    lines.append("Instruction-following rate = fraction of 6 instances (01-06) with valid JSON + correct x-vector length + numeric objective.")
-    lines.append("instance_07 is pre-excluded (see Data Issues below). Optimality gap = |obj_agent - obj_baseline| / |obj_baseline| (computed only over valid-format outputs).")
+    lines.append("Instruction-following rate = fraction of 8 instances (01-06, 08, 09) with valid JSON + correct x-vector length + numeric objective.")
+    lines.append("instance_07 and instance_10 are pre-excluded (see Data Issues below). Optimality gap = |obj_agent - obj_baseline| / |obj_baseline| (computed only over valid-format outputs).")
     lines.append("")
     lines.append("| Metric | Polite | Strict |")
     lines.append("|--------|--------|--------|")
-    lines.append(f"| IF rate (n=6) | {p['instruction_following_rate_raw']:.3f} ({p['n_instances_valid_format']}/6) | {s['instruction_following_rate_raw']:.3f} ({s['n_instances_valid_format']}/6) |")
+    lines.append(f"| IF rate (n=8) | {p['instruction_following_rate_raw']:.3f} ({p['n_instances_valid_format']}/8) | {s['instruction_following_rate_raw']:.3f} ({s['n_instances_valid_format']}/8) |")
 
-    p_if_ci = p["instruction_following_rate_ci_all6"]
-    s_if_ci = s["instruction_following_rate_ci_all6"]
+    p_if_ci = p["instruction_following_rate_ci_all8"]
+    s_if_ci = s["instruction_following_rate_ci_all8"]
     lines.append(f"| IF rate 95% CI | [{p_if_ci['ci_low']:.3f}, {p_if_ci['ci_high']:.3f}] | [{s_if_ci['ci_low']:.3f}, {s_if_ci['ci_high']:.3f}] |")
 
     p_gap = p["optimality_gap_valid_only"]
@@ -294,16 +320,27 @@ def generate_summary(report):
 
     lines.append(
         f"Instruction-following failure is the main finding, not the polite vs strict gap. "
-        f"Only {pn}/6 polite and {sn}/6 strict outputs pass format validation -- both styles are "
-        f"producing prose explanations rather than bare JSON for most instances. The 95% bootstrap CIs "
-        f"for IF rate overlap heavily (polite [{p_if_ci['ci_low']:.3f}, {p_if_ci['ci_high']:.3f}] vs "
+        f"Only {pn}/8 polite and {sn}/8 strict outputs pass format validation. "
+        f"Polite returns prose on all 8 instances. Strict has format failures on instances 08 and 09 "
+        f"(x-vector length mismatch: 08 strict returned 47 values vs expected 50; 09 strict returned "
+        f"104 vs expected 100 -- model miscounted variables, all zeros, infeasible). "
+        f"The 95% bootstrap CIs for IF rate overlap heavily "
+        f"(polite [{p_if_ci['ci_low']:.3f}, {p_if_ci['ci_high']:.3f}] vs "
         f"strict [{s_if_ci['ci_low']:.3f}, {s_if_ci['ci_high']:.3f}]), so we cannot distinguish "
-        f"the two styles on this metric at n=6. Optimality gap numbers are near-meaningless with "
+        f"the two styles on this metric at n=8. Optimality gap numbers are near-meaningless with "
         f"{pg_n} polite and {sg_n} strict valid outputs; the strict mean of {sg_mean:.4f} is dominated "
         f"by one outlier (instance_04, gap=39.0 -- model returned a feasible but suboptimal solution). "
-        f"6 instances is not enough to call a direction on optimality gap even if the harness produces "
-        f"valid JSON. The actionable item is fixing the run harness so polite prompts produce JSON "
+        f"8 instances is not enough to call a direction on optimality gap. "
+        f"The actionable item is fixing the run harness so polite prompts produce JSON "
         f"output, not prose -- that is a prompt-wrapper issue in Ryan's lane."
+    )
+    lines.append("")
+    lines.append(
+        "Cross-domain note (imagerec pass, commit eee3086): gpt-4o-mini returned the exact same "
+        "answer on all 9 image-rec problems regardless of polite vs strict style -- identical label, "
+        "count, or relation token in every case. IF rate was 1.0 for both styles, accuracy was "
+        "identical per problem. This is a data point, not a style signal, but it adds to the "
+        "picture: at n=9, no style effect is detectable on imagerec either."
     )
     lines.append("")
 
@@ -350,6 +387,6 @@ if __name__ == "__main__":
     s = agg["strict"]
     pg = p["optimality_gap_valid_only"]
     sg = s["optimality_gap_valid_only"]
-    print(f"\nPolite: IF={p['instruction_following_rate_raw']:.3f} ({p['n_instances_valid_format']}/6)  opt-gap={pg}")
-    print(f"Strict: IF={s['instruction_following_rate_raw']:.3f} ({s['n_instances_valid_format']}/6)  opt-gap={sg}")
+    print(f"\nPolite: IF={p['instruction_following_rate_raw']:.3f} ({p['n_instances_valid_format']}/8)  opt-gap={pg}")
+    print(f"Strict: IF={s['instruction_following_rate_raw']:.3f} ({s['n_instances_valid_format']}/8)  opt-gap={sg}")
     print(f"Data issues: {len(report['data_issues'])}")
