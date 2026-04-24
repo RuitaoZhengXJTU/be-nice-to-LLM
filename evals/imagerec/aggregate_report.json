@@ -1,0 +1,352 @@
+{
+  "meta": {
+    "model": "gpt-4o-mini",
+    "source_branch": "pv-01-Ryan",
+    "source_commit": "fae616f",
+    "n_problems": 9,
+    "n_outputs": 18,
+    "bootstrap_reps": 2000,
+    "alpha": 0.05,
+    "ci_method": "percentile"
+  },
+  "aggregate": {
+    "polite": {
+      "n_outputs": 9,
+      "n_valid_format": 9,
+      "instruction_following_rate_raw": 1.0,
+      "instruction_following_rate_ci": {
+        "mean": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "n": 9
+      },
+      "by_subtype": {
+        "clf": {
+          "n_valid": 3,
+          "top1_accuracy_ci": {
+            "mean": 0.6666666666666666,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3
+          }
+        },
+        "cnt": {
+          "n_valid": 3,
+          "exact_accuracy_ci": {
+            "mean": 0.3333333333333333,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3
+          },
+          "within_one_rate_ci": {
+            "mean": 0.6666666666666666,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3
+          }
+        },
+        "spt": {
+          "n_valid": 3,
+          "token_exact_accuracy_ci": {
+            "mean": 0.3333333333333333,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3
+          }
+        }
+      }
+    },
+    "strict": {
+      "n_outputs": 9,
+      "n_valid_format": 9,
+      "instruction_following_rate_raw": 1.0,
+      "instruction_following_rate_ci": {
+        "mean": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "n": 9
+      },
+      "by_subtype": {
+        "clf": {
+          "n_valid": 3,
+          "top1_accuracy_ci": {
+            "mean": 0.6666666666666666,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3
+          }
+        },
+        "cnt": {
+          "n_valid": 3,
+          "exact_accuracy_ci": {
+            "mean": 0.3333333333333333,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3
+          },
+          "within_one_rate_ci": {
+            "mean": 0.6666666666666666,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3
+          }
+        },
+        "spt": {
+          "n_valid": 3,
+          "token_exact_accuracy_ci": {
+            "mean": 0.3333333333333333,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3
+          }
+        }
+      }
+    }
+  },
+  "per_problem": [
+    {
+      "problem_id": "clf_01",
+      "subtype": "clf",
+      "ground_truth": {
+        "label": "bear"
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"label\": \"bear\"}\n```",
+        "parsed": {
+          "label": "bear"
+        },
+        "accuracy": 1.0
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"label\": \"bear\"}\n```",
+        "parsed": {
+          "label": "bear"
+        },
+        "accuracy": 1.0
+      }
+    },
+    {
+      "problem_id": "clf_02",
+      "subtype": "clf",
+      "ground_truth": {
+        "label": "train"
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"label\": \"mini roller coaster\"}\n```",
+        "parsed": {
+          "label": "mini roller coaster"
+        },
+        "accuracy": 0.0
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"label\": \"roller_coaster\"}\n```",
+        "parsed": {
+          "label": "roller_coaster"
+        },
+        "accuracy": 0.0
+      }
+    },
+    {
+      "problem_id": "clf_03",
+      "subtype": "clf",
+      "ground_truth": {
+        "label": "bus"
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"label\": \"bus\"}\n```",
+        "parsed": {
+          "label": "bus"
+        },
+        "accuracy": 1.0
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"label\": \"bus\"}\n```",
+        "parsed": {
+          "label": "bus"
+        },
+        "accuracy": 1.0
+      }
+    },
+    {
+      "problem_id": "cnt_01",
+      "subtype": "cnt",
+      "ground_truth": {
+        "count": 1
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"count\": 1}\n```",
+        "parsed": {
+          "count": 1
+        },
+        "accuracy": {
+          "exact": 1.0,
+          "within_one": true
+        }
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"count\": 1}\n```",
+        "parsed": {
+          "count": 1
+        },
+        "accuracy": {
+          "exact": 1.0,
+          "within_one": true
+        }
+      }
+    },
+    {
+      "problem_id": "cnt_02",
+      "subtype": "cnt",
+      "ground_truth": {
+        "count": 3
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"count\":1}\n```",
+        "parsed": {
+          "count": 1
+        },
+        "accuracy": {
+          "exact": 0.0,
+          "within_one": false
+        }
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"count\":1}\n```",
+        "parsed": {
+          "count": 1
+        },
+        "accuracy": {
+          "exact": 0.0,
+          "within_one": false
+        }
+      }
+    },
+    {
+      "problem_id": "cnt_03",
+      "subtype": "cnt",
+      "ground_truth": {
+        "count": 2
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"count\": 1}\n```",
+        "parsed": {
+          "count": 1
+        },
+        "accuracy": {
+          "exact": 0.0,
+          "within_one": true
+        }
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "{\"count\":1}",
+        "parsed": {
+          "count": 1
+        },
+        "accuracy": {
+          "exact": 0.0,
+          "within_one": true
+        }
+      }
+    },
+    {
+      "problem_id": "spt_01",
+      "subtype": "spt",
+      "ground_truth": {
+        "relation": "above"
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"relation\":\"above\"}\n```",
+        "parsed": {
+          "relation": "above"
+        },
+        "accuracy": 1.0
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"relation\":\"above\"}\n```",
+        "parsed": {
+          "relation": "above"
+        },
+        "accuracy": 1.0
+      }
+    },
+    {
+      "problem_id": "spt_02",
+      "subtype": "spt",
+      "ground_truth": {
+        "relation": "left of"
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"relation\":\"right of\"}\n```",
+        "parsed": {
+          "relation": "right of"
+        },
+        "accuracy": 0.0
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"relation\":\"right of\"}\n```",
+        "parsed": {
+          "relation": "right of"
+        },
+        "accuracy": 0.0
+      }
+    },
+    {
+      "problem_id": "spt_03",
+      "subtype": "spt",
+      "ground_truth": {
+        "relation": "above"
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"relation\": \"below\"}\n```",
+        "parsed": {
+          "relation": "below"
+        },
+        "accuracy": 0.0
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"relation\":\"below\"}\n```",
+        "parsed": {
+          "relation": "below"
+        },
+        "accuracy": 0.0
+      }
+    }
+  ],
+  "data_issues": []
+}
