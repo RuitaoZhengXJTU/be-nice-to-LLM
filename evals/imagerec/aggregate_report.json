@@ -2,102 +2,102 @@
   "meta": {
     "model": "gpt-4o-mini",
     "source_branch": "pv-01-Ryan",
-    "source_commit": "fae616f",
-    "n_problems": 9,
-    "n_outputs": 18,
+    "source_commit": "4a4cc9e",
+    "n_problems": 15,
+    "n_outputs": 30,
     "bootstrap_reps": 2000,
     "alpha": 0.05,
     "ci_method": "percentile"
   },
   "aggregate": {
     "polite": {
-      "n_outputs": 9,
-      "n_valid_format": 9,
+      "n_outputs": 15,
+      "n_valid_format": 15,
       "instruction_following_rate_raw": 1.0,
       "instruction_following_rate_ci": {
         "mean": 1.0,
         "ci_low": 1.0,
         "ci_high": 1.0,
-        "n": 9
+        "n": 15
       },
       "by_subtype": {
         "clf": {
-          "n_valid": 3,
+          "n_valid": 5,
           "top1_accuracy_ci": {
-            "mean": 0.6666666666666666,
-            "ci_low": 0.0,
+            "mean": 0.8,
+            "ci_low": 0.4,
             "ci_high": 1.0,
-            "n": 3
+            "n": 5
           }
         },
         "cnt": {
-          "n_valid": 3,
+          "n_valid": 5,
           "exact_accuracy_ci": {
-            "mean": 0.3333333333333333,
+            "mean": 0.4,
             "ci_low": 0.0,
-            "ci_high": 1.0,
-            "n": 3
+            "ci_high": 0.8,
+            "n": 5
           },
           "within_one_rate_ci": {
-            "mean": 0.6666666666666666,
-            "ci_low": 0.0,
+            "mean": 0.8,
+            "ci_low": 0.4,
             "ci_high": 1.0,
-            "n": 3
+            "n": 5
           }
         },
         "spt": {
-          "n_valid": 3,
+          "n_valid": 5,
           "token_exact_accuracy_ci": {
-            "mean": 0.3333333333333333,
-            "ci_low": 0.0,
+            "mean": 0.6,
+            "ci_low": 0.2,
             "ci_high": 1.0,
-            "n": 3
+            "n": 5
           }
         }
       }
     },
     "strict": {
-      "n_outputs": 9,
-      "n_valid_format": 9,
+      "n_outputs": 15,
+      "n_valid_format": 15,
       "instruction_following_rate_raw": 1.0,
       "instruction_following_rate_ci": {
         "mean": 1.0,
         "ci_low": 1.0,
         "ci_high": 1.0,
-        "n": 9
+        "n": 15
       },
       "by_subtype": {
         "clf": {
-          "n_valid": 3,
+          "n_valid": 5,
           "top1_accuracy_ci": {
-            "mean": 0.6666666666666666,
-            "ci_low": 0.0,
+            "mean": 0.8,
+            "ci_low": 0.4,
             "ci_high": 1.0,
-            "n": 3
+            "n": 5
           }
         },
         "cnt": {
-          "n_valid": 3,
+          "n_valid": 5,
           "exact_accuracy_ci": {
-            "mean": 0.3333333333333333,
+            "mean": 0.4,
             "ci_low": 0.0,
-            "ci_high": 1.0,
-            "n": 3
+            "ci_high": 0.8,
+            "n": 5
           },
           "within_one_rate_ci": {
-            "mean": 0.6666666666666666,
-            "ci_low": 0.0,
+            "mean": 0.8,
+            "ci_low": 0.4,
             "ci_high": 1.0,
-            "n": 3
+            "n": 5
           }
         },
         "spt": {
-          "n_valid": 3,
+          "n_valid": 5,
           "token_exact_accuracy_ci": {
-            "mean": 0.3333333333333333,
-            "ci_low": 0.0,
+            "mean": 0.6,
+            "ci_low": 0.2,
             "ci_high": 1.0,
-            "n": 3
+            "n": 5
           }
         }
       }
@@ -127,7 +127,8 @@
           "label": "bear"
         },
         "accuracy": 1.0
-      }
+      },
+      "polite_strict_identical": true
     },
     {
       "problem_id": "clf_02",
@@ -152,7 +153,8 @@
           "label": "roller_coaster"
         },
         "accuracy": 0.0
-      }
+      },
+      "polite_strict_identical": false
     },
     {
       "problem_id": "clf_03",
@@ -177,7 +179,60 @@
           "label": "bus"
         },
         "accuracy": 1.0
-      }
+      },
+      "polite_strict_identical": true
+    },
+    {
+      "problem_id": "clf_04",
+      "subtype": "clf",
+      "ground_truth": {
+        "label": "airplane"
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"label\": \"airplane\"}\n```",
+        "parsed": {
+          "label": "airplane"
+        },
+        "accuracy": 1.0
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"label\": \"airplane\"}\n```",
+        "parsed": {
+          "label": "airplane"
+        },
+        "accuracy": 1.0
+      },
+      "polite_strict_identical": true
+    },
+    {
+      "problem_id": "clf_05",
+      "subtype": "clf",
+      "ground_truth": {
+        "label": "horse"
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"label\": \"horse\"}\n```",
+        "parsed": {
+          "label": "horse"
+        },
+        "accuracy": 1.0
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"label\": \"horse\"}\n```",
+        "parsed": {
+          "label": "horse"
+        },
+        "accuracy": 1.0
+      },
+      "polite_strict_identical": true
     },
     {
       "problem_id": "cnt_01",
@@ -208,7 +263,8 @@
           "exact": 1.0,
           "within_one": true
         }
-      }
+      },
+      "polite_strict_identical": true
     },
     {
       "problem_id": "cnt_02",
@@ -239,7 +295,8 @@
           "exact": 0.0,
           "within_one": false
         }
-      }
+      },
+      "polite_strict_identical": true
     },
     {
       "problem_id": "cnt_03",
@@ -270,7 +327,72 @@
           "exact": 0.0,
           "within_one": true
         }
-      }
+      },
+      "polite_strict_identical": true
+    },
+    {
+      "problem_id": "cnt_04",
+      "subtype": "cnt",
+      "ground_truth": {
+        "count": 2
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"count\": 1}\n```",
+        "parsed": {
+          "count": 1
+        },
+        "accuracy": {
+          "exact": 0.0,
+          "within_one": true
+        }
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "{\"count\":1}",
+        "parsed": {
+          "count": 1
+        },
+        "accuracy": {
+          "exact": 0.0,
+          "within_one": true
+        }
+      },
+      "polite_strict_identical": true
+    },
+    {
+      "problem_id": "cnt_05",
+      "subtype": "cnt",
+      "ground_truth": {
+        "count": 2
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"count\": 2}\n```",
+        "parsed": {
+          "count": 2
+        },
+        "accuracy": {
+          "exact": 1.0,
+          "within_one": true
+        }
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"count\":2}\n```",
+        "parsed": {
+          "count": 2
+        },
+        "accuracy": {
+          "exact": 1.0,
+          "within_one": true
+        }
+      },
+      "polite_strict_identical": true
     },
     {
       "problem_id": "spt_01",
@@ -295,7 +417,8 @@
           "relation": "above"
         },
         "accuracy": 1.0
-      }
+      },
+      "polite_strict_identical": true
     },
     {
       "problem_id": "spt_02",
@@ -320,7 +443,8 @@
           "relation": "right of"
         },
         "accuracy": 0.0
-      }
+      },
+      "polite_strict_identical": true
     },
     {
       "problem_id": "spt_03",
@@ -345,8 +469,233 @@
           "relation": "below"
         },
         "accuracy": 0.0
-      }
+      },
+      "polite_strict_identical": true
+    },
+    {
+      "problem_id": "spt_04",
+      "subtype": "spt",
+      "ground_truth": {
+        "relation": "right of"
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"relation\":\"right of\"}\n```",
+        "parsed": {
+          "relation": "right of"
+        },
+        "accuracy": 1.0
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"relation\":\"right of\"}\n```",
+        "parsed": {
+          "relation": "right of"
+        },
+        "accuracy": 1.0
+      },
+      "polite_strict_identical": true
+    },
+    {
+      "problem_id": "spt_05",
+      "subtype": "spt",
+      "ground_truth": {
+        "relation": "below"
+      },
+      "polite": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"relation\": \"below\"}\n```",
+        "parsed": {
+          "relation": "below"
+        },
+        "accuracy": 1.0
+      },
+      "strict": {
+        "valid_format": true,
+        "error": null,
+        "raw_text": "```json\n{\"relation\": \"below\"}\n```",
+        "parsed": {
+          "relation": "below"
+        },
+        "accuracy": 1.0
+      },
+      "polite_strict_identical": true
     }
   ],
+  "identical_answer_summary": {
+    "n_problems_compared": 15,
+    "n_identical": 14,
+    "all_identical": false,
+    "detail": [
+      {
+        "problem_id": "clf_01",
+        "subtype": "clf",
+        "polite_answer": {
+          "label": "bear"
+        },
+        "strict_answer": {
+          "label": "bear"
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "clf_02",
+        "subtype": "clf",
+        "polite_answer": {
+          "label": "mini roller coaster"
+        },
+        "strict_answer": {
+          "label": "roller_coaster"
+        },
+        "identical": false
+      },
+      {
+        "problem_id": "clf_03",
+        "subtype": "clf",
+        "polite_answer": {
+          "label": "bus"
+        },
+        "strict_answer": {
+          "label": "bus"
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "clf_04",
+        "subtype": "clf",
+        "polite_answer": {
+          "label": "airplane"
+        },
+        "strict_answer": {
+          "label": "airplane"
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "clf_05",
+        "subtype": "clf",
+        "polite_answer": {
+          "label": "horse"
+        },
+        "strict_answer": {
+          "label": "horse"
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "cnt_01",
+        "subtype": "cnt",
+        "polite_answer": {
+          "count": 1
+        },
+        "strict_answer": {
+          "count": 1
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "cnt_02",
+        "subtype": "cnt",
+        "polite_answer": {
+          "count": 1
+        },
+        "strict_answer": {
+          "count": 1
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "cnt_03",
+        "subtype": "cnt",
+        "polite_answer": {
+          "count": 1
+        },
+        "strict_answer": {
+          "count": 1
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "cnt_04",
+        "subtype": "cnt",
+        "polite_answer": {
+          "count": 1
+        },
+        "strict_answer": {
+          "count": 1
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "cnt_05",
+        "subtype": "cnt",
+        "polite_answer": {
+          "count": 2
+        },
+        "strict_answer": {
+          "count": 2
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "spt_01",
+        "subtype": "spt",
+        "polite_answer": {
+          "relation": "above"
+        },
+        "strict_answer": {
+          "relation": "above"
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "spt_02",
+        "subtype": "spt",
+        "polite_answer": {
+          "relation": "right of"
+        },
+        "strict_answer": {
+          "relation": "right of"
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "spt_03",
+        "subtype": "spt",
+        "polite_answer": {
+          "relation": "below"
+        },
+        "strict_answer": {
+          "relation": "below"
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "spt_04",
+        "subtype": "spt",
+        "polite_answer": {
+          "relation": "right of"
+        },
+        "strict_answer": {
+          "relation": "right of"
+        },
+        "identical": true
+      },
+      {
+        "problem_id": "spt_05",
+        "subtype": "spt",
+        "polite_answer": {
+          "relation": "below"
+        },
+        "strict_answer": {
+          "relation": "below"
+        },
+        "identical": true
+      }
+    ]
+  },
   "data_issues": []
 }

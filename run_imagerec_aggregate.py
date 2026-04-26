@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Image-rec aggregate scorer: 9 problems (clf x3, cnt x3, spt x3) x polite/strict.
-Reads outputs from origin/pv-01-Ryan (commit fae616f) via git show.
+Image-rec aggregate scorer: 15 problems (clf x5, cnt x5, spt x5) x polite/strict.
+Reads outputs from origin/pv-01-Ryan (commit 4a4cc9e, which supersedes fae616f).
 Strips markdown code fences from raw_text before JSON parsing.
 Uses grade_image.py for format checks and accuracy computation.
 Bootstrap CI config: 2000 reps, alpha=0.05, percentile method (same as run_aggregate.py).
@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent / "evals" / "imagerec"))
 from grade_image import check_image_format, image_accuracy, CountResult  # noqa: E402
 
 RYAN_BRANCH = "origin/pv-01-Ryan"
-RYAN_COMMIT = "fae616f"
+RYAN_COMMIT = "4a4cc9e"
 MODEL = "gpt-4o-mini"
 OUTPUT_DIR = "evals/imagerec/outputs"
 
@@ -29,12 +29,18 @@ PROBLEMS = [
     {"id": "clf_01", "subtype": "clf", "ground_truth": {"label": "bear"}},
     {"id": "clf_02", "subtype": "clf", "ground_truth": {"label": "train"}},
     {"id": "clf_03", "subtype": "clf", "ground_truth": {"label": "bus"}},
+    {"id": "clf_04", "subtype": "clf", "ground_truth": {"label": "airplane"}},
+    {"id": "clf_05", "subtype": "clf", "ground_truth": {"label": "horse"}},
     {"id": "cnt_01", "subtype": "cnt", "ground_truth": {"count": 1}},
     {"id": "cnt_02", "subtype": "cnt", "ground_truth": {"count": 3}},
     {"id": "cnt_03", "subtype": "cnt", "ground_truth": {"count": 2}},
+    {"id": "cnt_04", "subtype": "cnt", "ground_truth": {"count": 2}},
+    {"id": "cnt_05", "subtype": "cnt", "ground_truth": {"count": 2}},
     {"id": "spt_01", "subtype": "spt", "ground_truth": {"relation": "above"}},
     {"id": "spt_02", "subtype": "spt", "ground_truth": {"relation": "left of"}},
     {"id": "spt_03", "subtype": "spt", "ground_truth": {"relation": "above"}},
+    {"id": "spt_04", "subtype": "spt", "ground_truth": {"relation": "right of"}},
+    {"id": "spt_05", "subtype": "spt", "ground_truth": {"relation": "below"}},
 ]
 
 
@@ -189,7 +195,34 @@ def run():
                 elif subtype == "spt":
                     results[style]["spt"].append(acc)
 
+        # Identical-answer check: compare polite vs strict parsed outputs
+        p_parsed = rec["polite"].get("parsed") if rec["polite"] else None
+        s_parsed = rec["strict"].get("parsed") if rec["strict"] else None
+        if p_parsed is not None and s_parsed is not None:
+            rec["polite_strict_identical"] = (p_parsed == s_parsed)
+        elif p_parsed is None and s_parsed is None:
+            rec["polite_strict_identical"] = None  # both invalid, can't compare
+        else:
+            rec["polite_strict_identical"] = False  # one valid, one not
+
         per_problem.append(rec)
+
+    # Build identical-answer summary
+    identical_summary = []
+    for rec in per_problem:
+        flag = rec.get("polite_strict_identical")
+        p_parsed = rec["polite"].get("parsed") if rec["polite"] else None
+        s_parsed = rec["strict"].get("parsed") if rec["strict"] else None
+        identical_summary.append({
+            "problem_id": rec["problem_id"],
+            "subtype": rec["subtype"],
+            "polite_answer": p_parsed,
+            "strict_answer": s_parsed,
+            "identical": flag,
+        })
+
+    n_identical = sum(1 for x in identical_summary if x["identical"] is True)
+    n_comparable = sum(1 for x in identical_summary if x["identical"] is not None)
 
     n_total = len(PROBLEMS)
 
@@ -236,6 +269,12 @@ def run():
         },
         "aggregate": agg,
         "per_problem": per_problem,
+        "identical_answer_summary": {
+            "n_problems_compared": n_comparable,
+            "n_identical": n_identical,
+            "all_identical": (n_identical == n_comparable and n_comparable > 0),
+            "detail": identical_summary,
+        },
         "data_issues": data_issues,
     }
 
@@ -352,17 +391,50 @@ def generate_summary(report):
     sn_spt = s["by_subtype"]["spt"]["n_valid"]
 
     lines.append(
-        f"All 18 outputs are JSON-shaped with finish_reason=stop (per Ryan). "
+        f"All {n*2} outputs are JSON-shaped with finish_reason=stop (per Ryan). "
         f"After fence-stripping and format validation: {pn}/{n} polite and {sn}/{n} strict "
         f"outputs pass check_image_format. "
         f"Valid counts by sub-type: clf polite={pn_clf}, strict={sn_clf}; "
         f"cnt polite={pn_cnt}, strict={sn_cnt}; "
         f"spt polite={pn_spt}, strict={sn_spt}. "
-        f"With only 3 problems per sub-type the CIs are very wide -- "
-        f"any style gap visible here is within noise. "
-        f"More problems per sub-type are needed before drawing conclusions about polite vs strict accuracy."
+        f"With only 5 problems per sub-type the CIs are still wide -- "
+        f"any apparent accuracy gap is likely within noise. "
+        f"The signal to watch is the polite/strict identical-answer pattern (see below)."
     )
     lines.append("")
+
+    # Identical-answer analysis section
+    ias = report.get("identical_answer_summary", {})
+    n_comp = ias.get("n_problems_compared", 0)
+    n_ident = ias.get("n_identical", 0)
+    all_ident = ias.get("all_identical", False)
+    detail = ias.get("detail", [])
+
+    lines.append("## Polite vs Strict Identical-Answer Analysis")
+    lines.append("")
+    if all_ident:
+        lines.append(
+            f"Polite and strict returned identical parsed answers on all {n_ident}/{n_comp} "
+            f"comparable problems. This pattern holds at n=5 per sub-type."
+        )
+    else:
+        lines.append(
+            f"Polite and strict returned identical parsed answers on {n_ident}/{n_comp} "
+            f"comparable problems. Divergences:"
+        )
+    lines.append("")
+    diverged = [x for x in detail if x["identical"] is False]
+    if diverged:
+        lines.append("| Problem | Sub-type | Polite answer | Strict answer |")
+        lines.append("|---------|----------|---------------|---------------|")
+        for d in diverged:
+            pa = str(d["polite_answer"]) if d["polite_answer"] is not None else "INVALID"
+            sa = str(d["strict_answer"]) if d["strict_answer"] is not None else "INVALID"
+            lines.append(f"| {d['problem_id']} | {d['subtype']} | {pa} | {sa} |")
+        lines.append("")
+    else:
+        lines.append("No divergences -- polite and strict answers are identical on every problem.")
+        lines.append("")
 
     if issues:
         lines.append("## Data Issues")
@@ -377,7 +449,7 @@ def generate_summary(report):
     else:
         lines.append("## Data Issues")
         lines.append("")
-        lines.append("None -- all 18 outputs parsed and passed check_image_format.")
+        lines.append(f"None -- all {n*2} outputs parsed and passed check_image_format.")
         lines.append("")
 
     return "\n".join(lines)
@@ -402,7 +474,10 @@ if __name__ == "__main__":
     agg = report["aggregate"]
     p = agg["polite"]
     s = agg["strict"]
-    print(f"\nPolite: IF={p['instruction_following_rate_raw']:.3f} ({p['n_valid_format']}/9)")
-    print(f"  clf={ci_str(p['by_subtype']['clf']['top1_accuracy_ci'])}" if False else "")
-    print(f"Strict: IF={s['instruction_following_rate_raw']:.3f} ({s['n_valid_format']}/9)")
+    n = report["meta"]["n_problems"]
+    print(f"\nPolite: IF={p['instruction_following_rate_raw']:.3f} ({p['n_valid_format']}/{n})")
+    print(f"Strict: IF={s['instruction_following_rate_raw']:.3f} ({s['n_valid_format']}/{n})")
+    ias = report["identical_answer_summary"]
+    print(f"Identical answers: {ias['n_identical']}/{ias['n_problems_compared']} "
+          f"(all_identical={ias['all_identical']})")
     print(f"Data issues: {len(report['data_issues'])}")
