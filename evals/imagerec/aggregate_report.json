@@ -697,5 +697,274 @@
       }
     ]
   },
-  "data_issues": []
+  "data_issues": [],
+  "multiseed": {
+    "meta": {
+      "n_problems": 15,
+      "seeds": [
+        "baseline",
+        "17",
+        "42"
+      ],
+      "n_seeds": 3,
+      "n_cells_total": 90,
+      "source_commit_baseline": "4a4cc9e",
+      "source_commit_seed_runs": "347ab63",
+      "bootstrap_reps": 2000,
+      "alpha": 0.05
+    },
+    "pooled_accuracy": {
+      "polite": {
+        "n_cells_total": 45,
+        "n_cells_valid": 45,
+        "instruction_following_rate": 1.0,
+        "by_subtype": {
+          "clf": {
+            "n_valid": 15,
+            "top1_accuracy_ci": {
+              "mean": 0.8,
+              "ci_low": 0.6,
+              "ci_high": 1.0,
+              "n": 15
+            }
+          },
+          "cnt": {
+            "n_valid": 15,
+            "exact_accuracy_ci": {
+              "mean": 0.4,
+              "ci_low": 0.13333333333333333,
+              "ci_high": 0.6666666666666666,
+              "n": 15
+            },
+            "within_one_rate_ci": {
+              "mean": 0.8,
+              "ci_low": 0.6,
+              "ci_high": 1.0,
+              "n": 15
+            }
+          },
+          "spt": {
+            "n_valid": 15,
+            "token_exact_accuracy_ci": {
+              "mean": 0.6,
+              "ci_low": 0.3333333333333333,
+              "ci_high": 0.8666666666666667,
+              "n": 15
+            }
+          }
+        }
+      },
+      "strict": {
+        "n_cells_total": 45,
+        "n_cells_valid": 45,
+        "instruction_following_rate": 1.0,
+        "by_subtype": {
+          "clf": {
+            "n_valid": 15,
+            "top1_accuracy_ci": {
+              "mean": 0.8,
+              "ci_low": 0.6,
+              "ci_high": 1.0,
+              "n": 15
+            }
+          },
+          "cnt": {
+            "n_valid": 15,
+            "exact_accuracy_ci": {
+              "mean": 0.5333333333333333,
+              "ci_low": 0.26666666666666666,
+              "ci_high": 0.8,
+              "n": 15
+            },
+            "within_one_rate_ci": {
+              "mean": 0.8,
+              "ci_low": 0.6,
+              "ci_high": 1.0,
+              "n": 15
+            }
+          },
+          "spt": {
+            "n_valid": 15,
+            "token_exact_accuracy_ci": {
+              "mean": 0.6666666666666666,
+              "ci_low": 0.4666666666666667,
+              "ci_high": 0.8666666666666667,
+              "n": 15
+            }
+          }
+        }
+      }
+    },
+    "stability": {
+      "polite": {
+        "stable_count": 14,
+        "n_problems": 15,
+        "unstable_problems": [
+          {
+            "problem_id": "clf_02",
+            "subtype": "clf",
+            "answers": {
+              "baseline": {
+                "label": "mini roller coaster"
+              },
+              "17": {
+                "label": "roller_coaster"
+              },
+              "42": {
+                "label": "roller_coaster"
+              }
+            }
+          }
+        ]
+      },
+      "strict": {
+        "stable_count": 13,
+        "n_problems": 15,
+        "unstable_problems": [
+          {
+            "problem_id": "cnt_04",
+            "subtype": "cnt",
+            "answers": {
+              "baseline": {
+                "count": 1
+              },
+              "17": {
+                "count": 2
+              },
+              "42": {
+                "count": 2
+              }
+            }
+          },
+          {
+            "problem_id": "spt_02",
+            "subtype": "spt",
+            "answers": {
+              "baseline": {
+                "relation": "right of"
+              },
+              "17": {
+                "relation": "right of"
+              },
+              "42": {
+                "relation": "left of"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "cross_seed_identical": {
+      "n_identical": 41,
+      "n_pairs_total": 45,
+      "identical_rate": 0.911111,
+      "non_identical_problems": [
+        {
+          "problem_id": "clf_02",
+          "subtype": "clf",
+          "identical_count": 2,
+          "n_seeds": 3,
+          "per_seed": {
+            "baseline": {
+              "polite": {
+                "label": "mini roller coaster"
+              },
+              "strict": {
+                "label": "roller_coaster"
+              },
+              "identical": false
+            },
+            "17": {
+              "polite": {
+                "label": "roller_coaster"
+              },
+              "strict": {
+                "label": "roller_coaster"
+              },
+              "identical": true
+            },
+            "42": {
+              "polite": {
+                "label": "roller_coaster"
+              },
+              "strict": {
+                "label": "roller_coaster"
+              },
+              "identical": true
+            }
+          }
+        },
+        {
+          "problem_id": "cnt_04",
+          "subtype": "cnt",
+          "identical_count": 1,
+          "n_seeds": 3,
+          "per_seed": {
+            "baseline": {
+              "polite": {
+                "count": 1
+              },
+              "strict": {
+                "count": 1
+              },
+              "identical": true
+            },
+            "17": {
+              "polite": {
+                "count": 1
+              },
+              "strict": {
+                "count": 2
+              },
+              "identical": false
+            },
+            "42": {
+              "polite": {
+                "count": 1
+              },
+              "strict": {
+                "count": 2
+              },
+              "identical": false
+            }
+          }
+        },
+        {
+          "problem_id": "spt_02",
+          "subtype": "spt",
+          "identical_count": 2,
+          "n_seeds": 3,
+          "per_seed": {
+            "baseline": {
+              "polite": {
+                "relation": "right of"
+              },
+              "strict": {
+                "relation": "right of"
+              },
+              "identical": true
+            },
+            "17": {
+              "polite": {
+                "relation": "right of"
+              },
+              "strict": {
+                "relation": "right of"
+              },
+              "identical": true
+            },
+            "42": {
+              "polite": {
+                "relation": "right of"
+              },
+              "strict": {
+                "relation": "left of"
+              },
+              "identical": false
+            }
+          }
+        }
+      ]
+    }
+  }
 }

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
 Image-rec aggregate scorer: 15 problems (clf x5, cnt x5, spt x5) x polite/strict.
-Reads outputs from origin/pv-01-Ryan (commit 4a4cc9e, which supersedes fae616f).
+Single-seed baseline (n=5/subtype): origin/pv-01-Ryan@4a4cc9e, files <id>_<style>_output.json.
+Multi-seed expansion (3 seeds: baseline, 17, 42): adds seed17/42 outputs from 347ab63,
+  files <id>_<style>_seed<N>_output.json.  Total 90 cells (15 x 2 x 3).
 Strips markdown code fences from raw_text before JSON parsing.
 Uses grade_image.py for format checks and accuracy computation.
 Bootstrap CI config: 2000 reps, alpha=0.05, percentile method (same as run_aggregate.py).
@@ -21,8 +23,11 @@ from grade_image import check_image_format, image_accuracy, CountResult  # noqa:
 
 RYAN_BRANCH = "origin/pv-01-Ryan"
 RYAN_COMMIT = "4a4cc9e"
+RYAN_COMMIT_MULTISEED = "347ab63"
 MODEL = "gpt-4o-mini"
 OUTPUT_DIR = "evals/imagerec/outputs"
+# Seeds for multi-seed analysis. "baseline" = original single-seed files (no suffix).
+SEEDS = ["baseline", 17, 42]
 
 # Ground truth and subtype per problem (from YAML files on pv-01-Ryan)
 PROBLEMS = [
@@ -52,9 +57,15 @@ def strip_fence(text: str) -> str:
     return s.strip()
 
 
-def load_output(problem_id: str, style: str):
-    """Load output JSON from Ryan's branch via git show. Returns (outer_data, error)."""
-    path = f"{OUTPUT_DIR}/{problem_id}_{style}_output.json"
+def load_output(problem_id: str, style: str, seed=None):
+    """Load output JSON from Ryan's branch via git show. Returns (outer_data, error).
+    seed=None or seed="baseline" -> single-seed filename (no suffix).
+    seed=int (17 or 42) -> seeded filename with _seed{N}_ infix.
+    """
+    if seed is None or seed == "baseline":
+        path = f"{OUTPUT_DIR}/{problem_id}_{style}_output.json"
+    else:
+        path = f"{OUTPUT_DIR}/{problem_id}_{style}_seed{seed}_output.json"
     r = subprocess.run(
         ["git", "show", f"{RYAN_BRANCH}:{path}"],
         capture_output=True, text=True,
@@ -105,16 +116,17 @@ def bootstrap_ci(values, n_boot=2000, alpha=0.05, seed=42):
     }
 
 
-def score_output(problem, style):
+def score_output(problem, style, seed=None):
     """
     Score a single output. Returns a result dict with:
     valid_format, accuracy (float or dict for cnt), error (str or None).
+    seed=None uses single-seed baseline file.
     """
     pid = problem["id"]
     subtype = problem["subtype"]
     gt = problem["ground_truth"]
 
-    outer, load_err = load_output(pid, style)
+    outer, load_err = load_output(pid, style, seed)
     if outer is None:
         return {"valid_format": False, "error": load_err, "raw_text": None,
                 "parsed": None, "accuracy": None}
@@ -279,6 +291,162 @@ def run():
     }
 
 
+def run_multiseed():
+    """
+    Score all 90 cells (15 problems x 2 styles x 3 seeds) and compute:
+      (a) Per-style accuracy by sub-type pooled over 3 seeds, bootstrap CIs.
+      (b) Per-style across-seed answer-stability (for each (problem, style), are all 3 seeds identical?).
+      (c) Cross-seed polite=strict identical-answer rate (out of 45 (problem, seed) pairs).
+    Returns a structured dict to be merged into the top-level report JSON.
+    """
+    # cells[(pid, style, seed)] = score_output result dict (valid_format, parsed, accuracy, ...)
+    cells = {}
+    for prob in PROBLEMS:
+        pid = prob["id"]
+        for style in ["polite", "strict"]:
+            for seed in SEEDS:
+                cells[(pid, style, seed)] = score_output(prob, style, seed)
+
+    # ---- (a) Pooled accuracy by (style, subtype) ----
+    pooled = {
+        "polite": {"clf": [], "cnt_exact": [], "cnt_within_one": [], "spt": [], "if_flags": []},
+        "strict": {"clf": [], "cnt_exact": [], "cnt_within_one": [], "spt": [], "if_flags": []},
+    }
+    for prob in PROBLEMS:
+        pid = prob["id"]
+        subtype = prob["subtype"]
+        for style in ["polite", "strict"]:
+            for seed in SEEDS:
+                r = cells[(pid, style, seed)]
+                if not r["valid_format"]:
+                    pooled[style]["if_flags"].append(0)
+                else:
+                    pooled[style]["if_flags"].append(1)
+                    acc = r["accuracy"]
+                    if subtype == "clf":
+                        pooled[style]["clf"].append(float(acc))
+                    elif subtype == "cnt":
+                        pooled[style]["cnt_exact"].append(float(acc["exact"]))
+                        pooled[style]["cnt_within_one"].append(1.0 if acc["within_one"] else 0.0)
+                    elif subtype == "spt":
+                        pooled[style]["spt"].append(float(acc))
+
+    def build_pooled_agg(style_key):
+        r = pooled[style_key]
+        n_cells = len(r["if_flags"])
+        n_valid = sum(r["if_flags"])
+        return {
+            "n_cells_total": n_cells,
+            "n_cells_valid": n_valid,
+            "instruction_following_rate": round(n_valid / n_cells, 6) if n_cells > 0 else 0.0,
+            "by_subtype": {
+                "clf": {
+                    "n_valid": len(r["clf"]),
+                    "top1_accuracy_ci": bootstrap_ci(r["clf"]),
+                },
+                "cnt": {
+                    "n_valid": len(r["cnt_exact"]),
+                    "exact_accuracy_ci": bootstrap_ci(r["cnt_exact"]),
+                    "within_one_rate_ci": bootstrap_ci(r["cnt_within_one"]),
+                },
+                "spt": {
+                    "n_valid": len(r["spt"]),
+                    "token_exact_accuracy_ci": bootstrap_ci(r["spt"]),
+                },
+            },
+        }
+
+    # ---- (b) Per-style across-seed answer stability ----
+    def compute_stability(style):
+        stable_count = 0
+        unstable = []
+        for prob in PROBLEMS:
+            pid = prob["id"]
+            seed_answers = [cells[(pid, style, s)].get("parsed") for s in SEEDS]
+            # Stable = all 3 non-None AND all equal (using JSON-serialised comparison)
+            if (
+                all(a is not None for a in seed_answers)
+                and len({json.dumps(a, sort_keys=True) for a in seed_answers}) == 1
+            ):
+                stable_count += 1
+            else:
+                entry = {
+                    "problem_id": pid,
+                    "subtype": prob["subtype"],
+                    "answers": {},
+                }
+                for i, s in enumerate(SEEDS):
+                    r = cells[(pid, style, s)]
+                    entry["answers"][str(s)] = (
+                        seed_answers[i] if r["valid_format"] else "FORMAT_FAILURE"
+                    )
+                unstable.append(entry)
+        return {
+            "stable_count": stable_count,
+            "n_problems": len(PROBLEMS),
+            "unstable_problems": unstable,
+        }
+
+    # ---- (c) Cross-seed polite=strict identical-answer rate ----
+    n_identical = 0
+    non_identical = []
+    for prob in PROBLEMS:
+        pid = prob["id"]
+        problem_identical_count = 0
+        per_seed_detail = {}
+        for seed in SEEDS:
+            p_r = cells[(pid, "polite", seed)]
+            s_r = cells[(pid, "strict", seed)]
+            p_ans = p_r.get("parsed") if p_r["valid_format"] else None
+            s_ans = s_r.get("parsed") if s_r["valid_format"] else None
+            is_ident = (p_ans is not None and s_ans is not None and p_ans == s_ans)
+            if is_ident:
+                n_identical += 1
+                problem_identical_count += 1
+            per_seed_detail[str(seed)] = {
+                "polite": p_ans if p_r["valid_format"] else "FORMAT_FAILURE",
+                "strict": s_ans if s_r["valid_format"] else "FORMAT_FAILURE",
+                "identical": is_ident,
+            }
+        if problem_identical_count < len(SEEDS):
+            non_identical.append({
+                "problem_id": pid,
+                "subtype": prob["subtype"],
+                "identical_count": problem_identical_count,
+                "n_seeds": len(SEEDS),
+                "per_seed": per_seed_detail,
+            })
+
+    n_pairs_total = len(PROBLEMS) * len(SEEDS)  # 45
+
+    return {
+        "meta": {
+            "n_problems": len(PROBLEMS),
+            "seeds": [str(s) for s in SEEDS],
+            "n_seeds": len(SEEDS),
+            "n_cells_total": len(PROBLEMS) * 2 * len(SEEDS),
+            "source_commit_baseline": RYAN_COMMIT,
+            "source_commit_seed_runs": RYAN_COMMIT_MULTISEED,
+            "bootstrap_reps": 2000,
+            "alpha": 0.05,
+        },
+        "pooled_accuracy": {
+            "polite": build_pooled_agg("polite"),
+            "strict": build_pooled_agg("strict"),
+        },
+        "stability": {
+            "polite": compute_stability("polite"),
+            "strict": compute_stability("strict"),
+        },
+        "cross_seed_identical": {
+            "n_identical": n_identical,
+            "n_pairs_total": n_pairs_total,
+            "identical_rate": round(n_identical / n_pairs_total, 6) if n_pairs_total > 0 else 0.0,
+            "non_identical_problems": non_identical,
+        },
+    }
+
+
 def generate_summary(report):
     meta = report["meta"]
     agg = report["aggregate"]
@@ -436,6 +604,137 @@ def generate_summary(report):
         lines.append("No divergences -- polite and strict answers are identical on every problem.")
         lines.append("")
 
+    # ---- Multi-seed section ----
+    ms = report.get("multiseed")
+    if ms:
+        ms_meta = ms["meta"]
+        pa = ms["pooled_accuracy"]
+        stab = ms["stability"]
+        csi = ms["cross_seed_identical"]
+        seeds_str = ", ".join(ms_meta["seeds"])
+        n_cells = ms_meta["n_cells_total"]
+        n_seeds = ms_meta["n_seeds"]
+
+        lines.append(
+            "## Multi-Seed Analysis "
+            f"(seeds: {seeds_str}; "
+            f"baseline@{ms_meta['source_commit_baseline']}, "
+            f"seed runs@{ms_meta['source_commit_seed_runs']})"
+        )
+        lines.append("")
+        lines.append(
+            f"Total cells: {n_cells} ({ms_meta['n_problems']} problems x 2 styles x {n_seeds} seeds). "
+            "Single-seed headline numbers above are unchanged; this section extends the picture."
+        )
+        lines.append("")
+
+        lines.append("### (a) Pooled Accuracy by Sub-type")
+        lines.append("")
+        lines.append(
+            "n = 5 problems x 3 seeds = 15 per (style, sub-type). "
+            "Bootstrap CI over 15 accuracy values (or fewer if format failures)."
+        )
+        lines.append("")
+
+        def ms_ci_str(d):
+            if d["mean"] is None:
+                return "n/a (0 valid)"
+            return f"{d['mean']:.4f} [95% CI: {d['ci_low']:.4f}, {d['ci_high']:.4f}] n={d['n']}"
+
+        ppa = pa["polite"]
+        spa = pa["strict"]
+        lines.append("| Metric | Polite | Strict |")
+        lines.append("|--------|--------|--------|")
+        lines.append(
+            f"| IF rate ({n_cells//2} cells/style) | "
+            f"{ppa['instruction_following_rate']:.3f} ({ppa['n_cells_valid']}/{n_cells//2}) | "
+            f"{spa['instruction_following_rate']:.3f} ({spa['n_cells_valid']}/{n_cells//2}) |"
+        )
+        lines.append(
+            f"| clf top-1 accuracy (pooled) | "
+            f"{ms_ci_str(ppa['by_subtype']['clf']['top1_accuracy_ci'])} | "
+            f"{ms_ci_str(spa['by_subtype']['clf']['top1_accuracy_ci'])} |"
+        )
+        lines.append(
+            f"| cnt exact accuracy (pooled) | "
+            f"{ms_ci_str(ppa['by_subtype']['cnt']['exact_accuracy_ci'])} | "
+            f"{ms_ci_str(spa['by_subtype']['cnt']['exact_accuracy_ci'])} |"
+        )
+        lines.append(
+            f"| cnt within-one rate (pooled) | "
+            f"{ms_ci_str(ppa['by_subtype']['cnt']['within_one_rate_ci'])} | "
+            f"{ms_ci_str(spa['by_subtype']['cnt']['within_one_rate_ci'])} |"
+        )
+        lines.append(
+            f"| spt token-exact accuracy (pooled) | "
+            f"{ms_ci_str(ppa['by_subtype']['spt']['token_exact_accuracy_ci'])} | "
+            f"{ms_ci_str(spa['by_subtype']['spt']['token_exact_accuracy_ci'])} |"
+        )
+        lines.append("")
+
+        lines.append("### (b) Across-Seed Answer Stability")
+        lines.append("")
+        stab_p = stab["polite"]
+        stab_s = stab["strict"]
+        lines.append(
+            f"For each (problem, style), do all 3 seeds return the same parsed answer? "
+            f"Polite: {stab_p['stable_count']}/{stab_p['n_problems']} stable. "
+            f"Strict: {stab_s['stable_count']}/{stab_s['n_problems']} stable."
+        )
+        lines.append("")
+        for style_label, stab_r in [("Polite", stab_p), ("Strict", stab_s)]:
+            if stab_r["unstable_problems"]:
+                lines.append(f"**{style_label} unstable problems:**")
+                lines.append("")
+                lines.append("| Problem | Sub-type | baseline | seed17 | seed42 |")
+                lines.append("|---------|----------|----------|--------|--------|")
+                for u in stab_r["unstable_problems"]:
+                    a = u["answers"]
+                    lines.append(
+                        f"| {u['problem_id']} | {u['subtype']} | "
+                        f"{a.get('baseline', '?')} | {a.get('17', '?')} | {a.get('42', '?')} |"
+                    )
+                lines.append("")
+        if stab_p["stable_count"] == stab_p["n_problems"] and stab_s["stable_count"] == stab_s["n_problems"]:
+            lines.append(
+                "All 15 problems are seed-stable for both styles -- "
+                "the model's parsed answer does not vary across seeds."
+            )
+            lines.append("")
+
+        lines.append("### (c) Cross-Seed Polite=Strict Identical-Answer Rate")
+        lines.append("")
+        n_ident = csi["n_identical"]
+        n_pairs = csi["n_pairs_total"]
+        rate = csi["identical_rate"]
+        lines.append(
+            f"Out of {n_pairs} (problem, seed) pairs, polite and strict returned the same "
+            f"parsed answer on {n_ident} ({rate:.3f})."
+        )
+        lines.append("")
+        non_ident = csi["non_identical_problems"]
+        if non_ident:
+            lines.append("Per-problem breakdown for problems with < 3/3 identical seeds:")
+            lines.append("")
+            for ni in non_ident:
+                lines.append(
+                    f"**{ni['problem_id']}** ({ni['subtype']}): "
+                    f"{ni['identical_count']}/{ni['n_seeds']} seeds identical"
+                )
+                for seed_k, sd in ni["per_seed"].items():
+                    marker = "=" if sd["identical"] else "!="
+                    lines.append(
+                        f"  - seed={seed_k}: polite={sd['polite']}  {marker}  strict={sd['strict']}"
+                    )
+                lines.append("")
+        else:
+            lines.append(
+                f"All {n_pairs} pairs are identical -- "
+                "polite and strict give the same answer on every (problem, seed) combination."
+            )
+            lines.append("")
+
+    # ---- Data Issues ----
     if issues:
         lines.append("## Data Issues")
         lines.append("")
@@ -458,6 +757,10 @@ def generate_summary(report):
 if __name__ == "__main__":
     report = run()
 
+    print("Running multi-seed analysis (90 cells)...")
+    ms_report = run_multiseed()
+    report["multiseed"] = ms_report
+
     out_dir = Path("evals/imagerec")
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -475,9 +778,26 @@ if __name__ == "__main__":
     p = agg["polite"]
     s = agg["strict"]
     n = report["meta"]["n_problems"]
-    print(f"\nPolite: IF={p['instruction_following_rate_raw']:.3f} ({p['n_valid_format']}/{n})")
+    print(f"\n--- Single-seed headline (n=5/subtype) ---")
+    print(f"Polite: IF={p['instruction_following_rate_raw']:.3f} ({p['n_valid_format']}/{n})")
     print(f"Strict: IF={s['instruction_following_rate_raw']:.3f} ({s['n_valid_format']}/{n})")
     ias = report["identical_answer_summary"]
     print(f"Identical answers: {ias['n_identical']}/{ias['n_problems_compared']} "
           f"(all_identical={ias['all_identical']})")
     print(f"Data issues: {len(report['data_issues'])}")
+
+    print(f"\n--- Multi-seed pooled (3 seeds, 90 cells) ---")
+    ms_pa = ms_report["pooled_accuracy"]
+    ms_csi = ms_report["cross_seed_identical"]
+    ms_stab = ms_report["stability"]
+    for style in ["polite", "strict"]:
+        pa_s = ms_pa[style]
+        clf_ci = pa_s["by_subtype"]["clf"]["top1_accuracy_ci"]
+        cnt_ci = pa_s["by_subtype"]["cnt"]["exact_accuracy_ci"]
+        spt_ci = pa_s["by_subtype"]["spt"]["token_exact_accuracy_ci"]
+        print(f"{style.capitalize()}: clf={clf_ci['mean']:.3f} cnt_exact={cnt_ci['mean']:.3f} "
+              f"spt={spt_ci['mean']:.3f}")
+    print(f"Cross-seed polite=strict: {ms_csi['n_identical']}/{ms_csi['n_pairs_total']} "
+          f"({ms_csi['identical_rate']:.3f})")
+    print(f"Stability: polite={ms_stab['polite']['stable_count']}/{ms_stab['polite']['n_problems']}, "
+          f"strict={ms_stab['strict']['stable_count']}/{ms_stab['strict']['n_problems']}")
