@@ -4,13 +4,15 @@ Run image-recognition eval with gpt-4o-mini (vision input).
 
 Loads all problem YAMLs from evals/imagerec/problems/, runs each problem under
 both polite and strict prompt wrappers, and saves raw outputs to
-evals/imagerec/outputs/<problem_id>_<style>_output.json.
+evals/imagerec/outputs/<problem_id>_<style>_output.json  (no seed)
+  or  <problem_id>_<style>_seed<N>_output.json            (with --seed N).
 
 Output schema per file:
   {
     "problem_id":    str,
     "style":         "polite" | "strict",
     "model":         str,
+    "seed":          int | null,
     "finish_reason": str | null,
     "raw_text":      str | null,
     "error":         str | null
@@ -123,11 +125,15 @@ def call_openai_vision(
     model: str = MODEL,
     temperature: int = TEMPERATURE,
     max_tokens: int = MAX_TOKENS,
+    seed: int = None,
 ) -> tuple:
     """
     Call the OpenAI Chat Completions API with a vision (image_url) content block.
     Returns (raw_text, finish_reason, error_string).
     On success, error_string is None. On failure, raw_text is None.
+
+    seed: integer passed directly to the API 'seed' field for reproducibility.
+          None means omit the field (default API behaviour).
     """
     try:
         import requests
@@ -150,6 +156,8 @@ def call_openai_vision(
             }
         ],
     }
+    if seed is not None:
+        payload["seed"] = seed
 
     for attempt in range(3):
         try:
@@ -208,7 +216,15 @@ def extract_json_from_text(raw: str):
 # Main evaluation loop
 # ---------------------------------------------------------------------------
 
-def run_eval(problems=None, styles=STYLES, model=MODEL):
+def run_eval(problems=None, styles=STYLES, model=MODEL, seed: int = None):
+    """
+    Run the eval loop.
+
+    seed: integer to pass to the OpenAI API 'seed' field.
+          When provided, output filenames use the seed-suffixed convention
+          (<problem_id>_<style>_seed<N>_output.json) so they do not overwrite
+          the original unsuffixed files. When None, the original naming is used.
+    """
     OUTPUTS_DIR.mkdir(exist_ok=True)
 
     if problems is None:
@@ -226,23 +242,29 @@ def run_eval(problems=None, styles=STYLES, model=MODEL):
 
         for style in styles:
             done += 1
-            print(f"[{done}/{total}] {prob_id} / {style} ...", flush=True)
+            seed_tag = f" seed={seed}" if seed is not None else ""
+            print(f"[{done}/{total}] {prob_id} / {style}{seed_tag} ...", flush=True)
 
             text_prompt = build_text_prompt(templates[style], prob)
             raw_text, finish_reason, error = call_openai_vision(
-                text_prompt, image_url, model=model
+                text_prompt, image_url, model=model, seed=seed
             )
 
             output = {
                 "problem_id": prob_id,
                 "style": style,
                 "model": model,
+                "seed": seed,
                 "finish_reason": finish_reason,
                 "raw_text": raw_text,
                 "error": error,
             }
 
-            out_path = OUTPUTS_DIR / f"{prob_id}_{style}_output.json"
+            if seed is not None:
+                out_path = OUTPUTS_DIR / f"{prob_id}_{style}_seed{seed}_output.json"
+            else:
+                out_path = OUTPUTS_DIR / f"{prob_id}_{style}_output.json"
+
             with open(out_path, "w", encoding="utf-8") as f:
                 json.dump(output, f, indent=2, ensure_ascii=True)
 
@@ -251,7 +273,8 @@ def run_eval(problems=None, styles=STYLES, model=MODEL):
             json_shaped = "JSON" if parsed is not None else "no-JSON"
             print(f"  -> {status} | finish={finish_reason} | {json_shaped}")
 
-            results[f"{prob_id}_{style}"] = {
+            key = f"{prob_id}_{style}" + (f"_seed{seed}" if seed is not None else "")
+            results[key] = {
                 "status": status,
                 "finish_reason": finish_reason,
                 "json_shaped": parsed is not None,
@@ -274,6 +297,32 @@ def summarize(results: dict):
 
 
 if __name__ == "__main__":
-    results = run_eval()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run imagerec eval with gpt-4o-mini vision API.")
+    parser.add_argument(
+        "--seed", type=int, default=None,
+        help="Integer seed for the OpenAI API 'seed' field. "
+             "Output files will be named <problem_id>_<style>_seed<N>_output.json "
+             "to avoid overwriting unsuffixed baseline files.",
+    )
+    parser.add_argument(
+        "--problems", nargs="*", default=None,
+        help="Subset of problem IDs to run (e.g. clf_01 cnt_02). Default: all.",
+    )
+    parser.add_argument(
+        "--styles", nargs="*", default=list(STYLES),
+        help="Prompt styles to run. Default: polite strict.",
+    )
+    args = parser.parse_args()
+
+    problems = None
+    if args.problems:
+        all_problems = load_problems()
+        problems = [p for p in all_problems if p["id"] in args.problems]
+        if not problems:
+            raise SystemExit(f"No matching problems found for: {args.problems}")
+
+    results = run_eval(problems=problems, styles=args.styles, seed=args.seed)
     print("\n=== Summary ===")
     summarize(results)
