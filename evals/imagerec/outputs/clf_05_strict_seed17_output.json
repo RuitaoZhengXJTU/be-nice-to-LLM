@@ -1,0 +1,9 @@
+{
+  "problem_id": "clf_05",
+  "style": "strict",
+  "model": "gpt-4o-mini",
+  "seed": 17,
+  "finish_reason": "stop",
+  "raw_text": "```json\n{\"label\": \"horse\"}\n```",
+  "error": null
+}

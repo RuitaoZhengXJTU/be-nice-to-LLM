@@ -1,0 +1,9 @@
+{
+  "problem_id": "spt_04",
+  "style": "strict",
+  "model": "gpt-4o-mini",
+  "seed": 42,
+  "finish_reason": "stop",
+  "raw_text": "```json\n{\"relation\":\"right of\"}\n```",
+  "error": null
+}

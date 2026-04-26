@@ -1,0 +1,9 @@
+{
+  "problem_id": "cnt_02",
+  "style": "polite",
+  "model": "gpt-4o-mini",
+  "seed": 42,
+  "finish_reason": "stop",
+  "raw_text": "```json\n{\"count\":1}\n```",
+  "error": null
+}
